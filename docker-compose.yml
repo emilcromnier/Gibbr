@@ -9,7 +9,8 @@ services:
       - "9000:8080"
     environment:
       - MONGO_URI=mongodb://root:pass@mongo:27017/gibbr?authSource=admin
-      #- JWT_SECRET=supersecretkey  for future
+      - JWT_SECRET=EmilMatildaAlexPontusGibbr
+      - RAWG_API_KEY=9219098fe86e4b47b7f197f0c64e0bff
     depends_on:
       - mongo
 
