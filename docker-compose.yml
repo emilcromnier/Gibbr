@@ -1,10 +1,17 @@
 
 version: "3.8"
+
 services:
+
   server:
     build: ./server
     ports:
       - "9000:8080"
+    environment:
+      - MONGO_URI=mongodb://root:pass@mongo:27017/gibbr?authSource=admin
+      #- JWT_SECRET=supersecretkey  for future
+    depends_on:
+      - mongo
 
   client:
     build: ./client
@@ -13,3 +20,17 @@ services:
     depends_on:
       - server
 
+  mongo:
+    image: mongo:6
+    container_name: gibbr-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
