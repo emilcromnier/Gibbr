@@ -24,7 +24,12 @@ const UserSchema = new mongoose.Schema({
         gamesReviewed : { type: Number, default: 0 },
         //averageScore : { type: Number, default: 0 },  //if we want individual score distribution
         gamesCompleted : { type: Number, default: 0 }
-    }
+    },
+    favorites: {
+    type: [String],      // store game slugs or IDs
+    validate: [val => val.length <= 4, '{PATH} exceeds the limit of 4']
+  }
+
 }, {timestamps: true});
 
 UserSchema.virtual("reviews", {
@@ -34,3 +39,16 @@ UserSchema.virtual("reviews", {
 });
 
 module.exports = mongoose.model('User', UserSchema);  //node.js export. Apparently node pluralizes the model name to create the collection name
+
+/*await User.findByIdAndUpdate(
+  userId,
+  { $addToSet: { favorites: "battlefield-1" } }  // $addToSet prevents duplicates
+);
+
+await User.findByIdAndUpdate(
+  userId,
+  { $pull: { favorites: "battlefield-1" } }
+);
+
+*/
+
