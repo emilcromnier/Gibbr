@@ -14,7 +14,7 @@ app.listen(8080, () => {
 const app = require("./app");   // Express config in app.js
 const connectDB = require("./config/db");
 
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 8080;
 
 // Connect to Mongo first, then start server
 connectDB().then(() => {

@@ -4,6 +4,7 @@ const cors = require("cors");
 //const morgan = require("morgan");
 
 
+
 const app = express();
 app.use(express.json());
 
@@ -11,7 +12,7 @@ app.use(express.json());
 //app.use(helmet());
 //app.use(morgan("dev"));
 
-app.use(cors({ origin: "http://localhost:9000" }));
+app.use(cors({ origin: "http://localhost:8080" }));
 
 // Test route
 app.get("/", (req, res) => {
@@ -22,9 +23,11 @@ app.get("/", (req, res) => {
 const authRoutes = require("./routes/auth");
 const reviewRoutes = require("./routes/reviews");
 const gameRoutes = require("./routes/games");
+const userRoutes = require("./routes/users");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/games", gameRoutes);
+app.use("/api/users", userRoutes);
 
 module.exports = app;

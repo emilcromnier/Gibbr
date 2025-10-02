@@ -23,13 +23,14 @@ router.post("/login", async (req, res) => {
   const user = await User.findOne({
     $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
   }); //wait for either username or email
+  console.log(user);
 
   if (!user || user.password !== password) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
   const token = jwt.sign({ userId: user._id }, secret, { expiresIn: "1h" });
-  res.json({ token });
+  res.json({ message: "Login Success", token });
 });
 
 module.exports = router;
