@@ -5,9 +5,11 @@ const ReviewSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
     },
     gameSlug: { type: String, required: true }, // store RAWG slug
-    reviewText: { type: String, required: true },
+    reviewText: { type: String },
+    liked: { type: Boolean, default: false },
     rating: { type: Number, required: true, min : 0, max:10}, //0-5 scale with halves
-    completed : {type: Boolean, default: false}
+    completed : {type: Boolean, default: false},
+    completedAt: { type: Date }
     
 }, { timestamps: true });
 
@@ -18,6 +20,14 @@ ReviewSchema.set("toJSON", {
   transform: (_, ret) => {
     ret.reviewId = ret._id;
     delete ret._id;
+  }
+});
+
+ReviewSchema.pre('validate', function(next) {
+  if (!this.reviewText && !this.rating && !this.liked) {
+    next(new Error("A review must have at least a like, rating, or text."));
+  } else {
+    next();
   }
 });
 
