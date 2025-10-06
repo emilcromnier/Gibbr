@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 /*import AppPresenter from './appPresenter';*/
 
 import NavbarPresenter from "./presenters/NavbarPresenter.jsx"
+import GameGridPresenter from './presenters/GameGridPresenter.jsx';
 import {  createHashRouter,  RouterProvider, useParams} from "react-router-dom";
 
 
@@ -29,7 +30,7 @@ export default observer(
         return createHashRouter([
             {
                 path: "/",
-                element: <div className="general"><NavbarPresenter/> </div>
+                element: <div className="general"><NavbarPresenter/> <GameGridPresenter/> </div>
             },
 
 
