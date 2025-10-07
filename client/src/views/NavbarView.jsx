@@ -1,6 +1,6 @@
 import '/src/App.css'
 import { observer } from 'mobx-react-lite';
-import logo from '../assets/gibbrLogo.png';
+import logo from '../assets/GibbR_new_logo.png.png';
 
 
 
@@ -16,6 +16,10 @@ function Navbar(props) {
     
     }
 
+    function ToProfileACB(){
+        window.location.hash = "#/profile"
+    }
+
     
 
   return(
@@ -25,7 +29,7 @@ function Navbar(props) {
         <img className="navbar_img" src={logo} alt="Gibbr Logo" />
         <button className="nav_home_btn" onClick={BackToMenuACB} >Home</button>
         <button className="nav_friends_btn" onClick={ToFriendsACB}>Friends</button>
-        <button className="nav_profile_btn" >Profile</button>        
+        <button className="nav_profile_btn" onClick={ToProfileACB}>Profile</button>        
         <button className='login_navbar'  >Login</button>
     </div>
 
