@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
     },
     unique: true,
   },
+
   email: {
     type: String,
     required: function () {
@@ -17,18 +18,35 @@ const UserSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+
     password: {  //hash later (bcryptjs or custom?)
         type: String, required: true
     },
-    stats:{
+  
+    stats: {
         gamesReviewed : { type: Number, default: 0 },
         //averageScore : { type: Number, default: 0 },  //if we want individual score distribution
         gamesCompleted : { type: Number, default: 0 }
     },
+
     favorites: {
     type: [String],      // store game slugs or IDs
     validate: [val => val.length <= 4, '{PATH} exceeds the limit of 4']
+  },
+
+  currentlyPlaying: [
+  {
+    gameSlug: { type: String, required: true },
+    startedAt: { type: Date, default: Date.now }
   }
+],
+
+   backlog: [
+    {
+      gameSlug: { type: String, required: true },
+      addedAt: { type: Date, default: Date.now }
+    }
+  ]
 
 }, {timestamps: true});
 
@@ -37,6 +55,19 @@ UserSchema.virtual("reviews", {
   localField: "_id",
   foreignField: "userId"
 });
+
+ // Removes game from from currentlyPlaying upon completion
+UserSchema.methods.markGameCompleted = async function (gameSlug) {
+ 
+  this.currentlyPlaying = this.currentlyPlaying.filter(slug => slug !== gameSlug);
+
+  // Increment stats
+  this.stats.gamesReviewed += 1;
+  this.stats.gamesCompleted += 1;
+
+  await this.save();
+};
+
 
 module.exports = mongoose.model('User', UserSchema);  //node.js export. Apparently node pluralizes the model name to create the collection name
 

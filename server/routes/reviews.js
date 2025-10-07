@@ -5,23 +5,31 @@ const auth = require("../middleware/auth");
 
 // Create review
 router.post("/", auth, async (req, res) => {
-  const { gameSlug, reviewText, rating, completed } = req.body;
+  const { gameSlug, reviewText, rating, completed, liked } = req.body;
+
   try {
     const review = await Review.create({
       userId: req.user.userId,
       gameSlug,
       reviewText,
       rating,
-      completed
+      completed,
+      liked,
+      completedAt: completed ? new Date() : null
     });
 
-    await User.findByIdAndUpdate(req.user.userId, { $inc: { "stats.gamesReviewed": 1 } });
+    // If completed, update user stats & remove from currentlyPlaying
+    if (completed) {
+      const user = await User.findById(req.user.userId);
+      if (user) await user.markGameCompleted(gameSlug);
+    }
 
     res.status(201).json(review);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
+
 
 
 //get by rating
@@ -36,32 +44,45 @@ router.get("/popular", async (req, res) => {
 
 
 // Update review
-router.put("/:reviewId", auth, async (req, res) => {
+router.put("/:reviewId", authMiddleware, async (req, res) => {
   const { reviewId } = req.params;
-  const { reviewText, rating, completed } = req.body;
+  const { reviewText, rating, completed, liked } = req.body;
 
   try {
     const review = await Review.findById(reviewId);
 
     if (!review) return res.status(404).json({ error: "Review not found" });
-
-    // Make sure the user owns this review
-    if (review.userId.toString() !== req.user.userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (review.userId.toString() !== req.user.userId) return res.status(401).json({ error: "Unauthorized" });
 
     // Update fields
     if (reviewText !== undefined) review.reviewText = reviewText;
     if (rating !== undefined) review.rating = rating;
-    if (completed !== undefined) review.completed = completed;
+    if (liked !== undefined) review.liked = liked;
+
+    // Handle completion
+    if (completed !== undefined) {
+      if (!review.completed && completed) {
+        // Marking as completed now
+        review.completed = true;
+        review.completedAt = new Date();
+
+        const user = await User.findById(req.user.userId);
+        if (user) await user.markGameCompleted(review.gameSlug);
+      } else if (review.completed && !completed) {
+        review.completed = false;
+        review.completedAt = null;
+      }
+    }
 
     await review.save();
-
     res.json(review);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 
 // Delete review
@@ -80,7 +101,7 @@ router.delete("/:reviewId", auth, async (req, res) => {
 
     await Review.deleteOne({ _id: reviewId });
 
-    await User.findByIdAndUpdate(req.user.userId, { $inc: { "stats.gamesReviewed": -1 } });
+    await User.findByIdAndUpdate(req.user.userId, { $inc: { "stats.gamesReviewed": -1 } }); //decrease in mongo
 
     res.json({ message: "Review deleted successfully" });
   } catch (err) {
