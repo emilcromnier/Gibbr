@@ -8,6 +8,8 @@ import GameGridPresenter from './presenters/GameGridPresenter.jsx';
 
 import FriendsPresenter from './presenters/FriendsPresenter.jsx';
 
+import ProfilePresenter from './presenters/ProfilePresenter.jsx';
+
 import {  createHashRouter,  RouterProvider, useParams} from "react-router-dom";
 
 
@@ -38,11 +40,15 @@ export default observer(
             },
             {
                 path: "/menu",
-                element: <div className="general"><NavbarPresenter/> </div>
+                element: <div className="general"><NavbarPresenter/> <GameGridPresenter/> </div>
             },
             {
                 path: "/friends",
                 element: <div className="general"><NavbarPresenter/> <FriendsPresenter/> </div>
+            },
+                        {
+                path: "/profile",
+                element: <div className="general"><NavbarPresenter/> <ProfilePresenter/> </div>
             },
 
 
