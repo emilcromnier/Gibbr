@@ -1,4 +1,4 @@
-import { searchGames, getTrendingGames } from "./GameSource";
+import { searchGames, getTrendingGames, getGameById } from "./GameSource";
 
 const GamesModel= {
   loading: false,
@@ -16,6 +16,31 @@ const GamesModel= {
   }));
 
   console.log("Games loaded:", this.trendingGames);
+  },
+
+  async fetchGameById(id) {
+    try {
+      this.loading = true;
+      this.error = null;
+
+      const data = await getGameById(id); // call your backend
+      this.selectedGame = {
+        id: data.id || data.slug,
+        title: data.name,
+        description: data.description_raw || data.description,
+        image: data.background_image || "https://via.placeholder.com/150",
+        released: data.released,
+        rating: data.rating,
+        platforms: data.platforms?.map(p => p.platform.name) || [],
+        genres: data.genres?.map(g => g.name) || [],
+      };
+      console.log("SELECTED GAME: ", this.selectedGame);
+    } catch (err) {
+      console.error("Error fetching game by ID:", err);
+      this.error = err.message;
+    } finally {
+      this.loading = false;
+    }
   }
 
   };

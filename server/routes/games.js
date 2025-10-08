@@ -22,6 +22,18 @@ router.get("/trending", async (req, res) => {
   }
 });
 
+//ID
+router.get("/id/:id", async (req, res) => {
+  try {
+    const { id } = req.params; // get the ID from the URL
+    const response = await axios.get(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`);
+    res.json(response.data); // send back the single game object
+  } catch (err) {
+    console.error("Error fetching game by ID:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
  // Find all reviews for this game
 router.get("/:gameSlug/reviews", async (req, res) => {
   const { gameSlug } = req.params;

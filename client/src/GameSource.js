@@ -16,6 +16,16 @@ export async function searchGames(query) {
   }
 }
 
+export async function getGameById(id) {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/games/id/${id}`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching game by ID:", err);
+    throw err;
+  }
+}
+
 
 export async function getTrendingGames() {
   try {
