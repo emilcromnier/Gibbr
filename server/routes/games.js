@@ -10,6 +10,18 @@ router.get("/search", async (req, res) => {
   res.json(response.data);
 });
 
+router.get("/trending", async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const response = await axios.get(
+      `https://api.rawg.io/api/games?key=${API_KEY}&dates=${currentYear}-01-01,${currentYear}-12-31&ordering=-added&page_size=20`
+    );
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
  // Find all reviews for this game
 router.get("/:gameSlug/reviews", async (req, res) => {
   const { gameSlug } = req.params;

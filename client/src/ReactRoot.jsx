@@ -21,7 +21,7 @@ export default observer(
                 
                
                 <div>
-                <RouterProvider router={makeRouter()}/>
+                <RouterProvider router={makeRouter(props.model)}/>
                 {}
                 
                 </div>
@@ -32,15 +32,15 @@ export default observer(
      )
 
 
-     function makeRouter(){
+     function makeRouter(model){
         return createHashRouter([
             {
                 path: "/",
-                element: <div className="general"><NavbarPresenter/> <GameGridPresenter/> </div>
+                element: <div className="general"><NavbarPresenter/> <GameGridPresenter model={model}/> </div>
             },
             {
                 path: "/menu",
-                element: <div className="general"><NavbarPresenter/> <GameGridPresenter/> </div>
+                element: <div className="general"><NavbarPresenter/> <GameGridPresenter model={model}/> </div>
             },
             {
                 path: "/friends",
