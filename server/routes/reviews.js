@@ -44,7 +44,7 @@ router.get("/popular", async (req, res) => {
 
 
 // Update review
-router.put("/:reviewId", authMiddleware, async (req, res) => {
+router.put("/:reviewId", auth, async (req, res) => {
   const { reviewId } = req.params;
   const { reviewText, rating, completed, liked } = req.body;
 
