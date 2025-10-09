@@ -10,6 +10,7 @@ import FriendsPresenter from './presenters/FriendsPresenter.jsx';
 
 import ProfilePresenter from './presenters/ProfilePresenter.jsx';
 
+import GamePresenter from './presenters/GamePresenter.jsx';
 import {  createHashRouter,  RouterProvider, useParams} from "react-router-dom";
 
 
@@ -49,6 +50,10 @@ export default observer(
                         {
                 path: "/profile",
                 element: <div className="general"><NavbarPresenter/> <ProfilePresenter/> </div>
+            },
+            {
+                path: "/game/:id", // Dynamic route for individual games
+                element: <div className="general"><NavbarPresenter /> <GamePresenter model={model} /></div>
             },
 
 

@@ -8,10 +8,14 @@ function GameGrid(props) {
   const games = props.games;
   console.log("Games to render:", games);
 
+  function InspectGameACB(gameId){
+    window.location.hash = `#/game/${gameId}`;
+  }
+
   return (
     <div>
       {games.map((game) => (
-        <div>
+        <div className='gameContainer' onClick={() => InspectGameACB(game.id)}>
         <p>{game.title}</p>
         <img
           key={game.id}
