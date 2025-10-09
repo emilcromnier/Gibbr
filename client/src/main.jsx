@@ -8,15 +8,22 @@ import model from './GamesModel.js'
 
 import { observable, configure, reaction } from 'mobx'
 import GamesModel from './GamesModel.js'
+import UserModel from './UserModel.js'
 configure({ enforceActions: "never" }) // we don’t use MobX actions
-const reactiveModel = observable(GamesModel)
+const gamesModel = observable(GamesModel)
+const userModel = observable(UserModel)
+
+const rootModel = observable({
+  games: gamesModel,
+  user: userModel,
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ReactRoot model={reactiveModel} />
+    <ReactRoot model={rootModel} />
   </StrictMode>,
 )
 
-window.myModel= reactiveModel;   
-reactiveModel.fetchTrendingGames();
+window.myModel= rootModel;   
+rootModel.games.fetchTrendingGames();
 
