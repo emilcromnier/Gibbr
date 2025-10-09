@@ -10,15 +10,15 @@ function GamePresenter(props){
 
 
     if(id){
-        props.model.fetchGameById(id);
+        props.model.games.fetchGameById(id);
     }
 
     
-    if (!props.model.selectedGame) {
+    if (!props.model.games.selectedGame || props.model.games.selectedGame.id !== Number(id)) {
     return <div>Loading game details...</div>; // Show loading until the game is fetched
     }
 
 
-    return <Game game={props.model.selectedGame}/>;
+    return <Game game={props.model.games.selectedGame}/>;
     
 })
