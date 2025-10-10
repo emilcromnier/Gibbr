@@ -20,6 +20,10 @@ function Navbar(props) {
         window.location.hash = "#/profile"
     }
 
+        function ToAuthACB(){
+        window.location.hash = "#/auth"
+    }
+
     
 
   return(
@@ -30,7 +34,7 @@ function Navbar(props) {
         <button className="nav_home_btn" onClick={BackToMenuACB} >Home</button>
         <button className="nav_friends_btn" onClick={ToFriendsACB}>Friends</button>
         <button className="nav_profile_btn" onClick={ToProfileACB}>Profile</button>        
-        <button className='login_navbar'  >Login</button>
+        <button className='login_navbar' onClick={ToAuthACB} >Login</button>
     </div>
 
 

@@ -8,14 +8,12 @@ const GamesModel= {
 
   async fetchTrendingGames() {
     const data = await getTrendingGames();
-    console.log("Data", data);
     this.trendingGames = data.results.map(game => ({
     id: game.id || game.slug, // use slug as fallback if id is missing
     title: game.name,
     image: game.background_image || "https://via.placeholder.com/150",
   }));
 
-  console.log("Games loaded:", this.trendingGames);
   },
 
   async fetchGameById(id) {
@@ -34,7 +32,7 @@ const GamesModel= {
         platforms: data.platforms?.map(p => p.platform.name) || [],
         genres: data.genres?.map(g => g.name) || [],
       };
-      console.log("SELECTED GAME: ", this.selectedGame);
+     
     } catch (err) {
       console.error("Error fetching game by ID:", err);
       this.error = err.message;

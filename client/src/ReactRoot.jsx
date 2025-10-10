@@ -12,6 +12,7 @@ import ProfilePresenter from './presenters/ProfilePresenter.jsx';
 
 import GamePresenter from './presenters/GamePresenter.jsx';
 import {  createHashRouter,  RouterProvider, useParams} from "react-router-dom";
+import AuthPresenter from './presenters/AuthPresenter.jsx';
 
 
 
@@ -54,6 +55,10 @@ export default observer(
             {
                 path: "/game/:id", // Dynamic route for individual games
                 element: <div className="general"><NavbarPresenter /> <GamePresenter model={model} /></div>
+            },
+                        {
+                path: "/auth", 
+                element: <div className="general"><NavbarPresenter /> <AuthPresenter model={model} /></div>
             },
 
 
