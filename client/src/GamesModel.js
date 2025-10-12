@@ -24,6 +24,7 @@ const GamesModel= {
       const data = await getGameById(id); // call your backend
       this.selectedGame = {
         id: data.id || data.slug,
+        slug: data.slug,
         title: data.name,
         description: data.description_raw || data.description,
         image: data.background_image || "https://via.placeholder.com/150",
