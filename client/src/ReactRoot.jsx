@@ -50,7 +50,7 @@ export default observer(
             },
                         {
                 path: "/profile",
-                element: <div className="general"><NavbarPresenter/> <ProfilePresenter/> </div>
+                element: <div className="general"><NavbarPresenter/> <ProfilePresenter model={model}/> </div>
             },
             {
                 path: "/game/:id", // Dynamic route for individual games

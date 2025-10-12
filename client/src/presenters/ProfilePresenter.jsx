@@ -4,15 +4,27 @@ import Profile from '../views/ProfileView';
 
 
 export default observer(
-function FriendsPresenter(props){
-    const placeholderWishlist = [
-  { id: 1, name: "BF6" },
-  { id: 2, name: "Assassin's Creed" },
-  { id: 3, name: "Crysis" },
-  { id: 4, name: "Bamse" },
-  { id: 5, name: "RDR2" },
-];
+function ProfilePresenter(props){
 
-    return <Profile wishlist={placeholderWishlist}/>;
+    const user = props.model.user.currentUser;
+    console.log("LOADED USER", user);
+
+
+    if (!user) {
+        return (
+        <div >
+            <h2>You are not logged in</h2>
+            <p>
+            <a href="#/login">Log in</a> to see your profile.
+            </p>
+        </div>
+        );
+    }
+
+    const wishlist = user.backlog || [];
+    const reviews = user.reviews || [];
+
+
+    return <Profile username={user.username} description={user.description || "No description yet"} wishlist={wishlist} reviews={reviews}/>;
     
 })
