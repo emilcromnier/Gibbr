@@ -26,6 +26,7 @@ router.get("/:username/reviews", async (req, res) => {
   }
 });
 
+
 // Get user's game diary (chronological list)
 router.get("/:username/diary", async (req, res) => {
   try {
@@ -45,20 +46,78 @@ router.get("/:username/diary", async (req, res) => {
   }
 });
 
-router.get("/:username/backlog", async (req, res) => {
+
+// ------------------------------ FRIENDS ROUTES ------------------------------
+
+// Get user's friends list (id + username only)
+router.get("/:username/friends", async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username })
+      .populate("friends", "_id username"); // only _id and username
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json(user.friends);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a friend
+router.post("/:username/friends", auth, async (req, res) => {
   const { username } = req.params;
+  const { friendId } = req.body; // ID of the friend to add
+
+  if (!friendId) return res.status(400).json({ error: "friendId is required" });
 
   try {
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Return only the slugs — addedAt is internal
-    const backlog = user.backlog.map(item => item.gameSlug);
-    res.json({ backlog });
+    // Ensure user is editing their own friends list
+    if (req.user.userId !== user._id.toString())
+      return res.status(403).json({ error: "Unauthorized" });
+
+    // Prevent adding duplicates or self
+    if (user.friends.includes(friendId))
+      return res.status(400).json({ error: "Already friends" });
+    if (friendId === user._id.toString())
+      return res.status(400).json({ error: "Cannot add yourself" });
+
+    user.friends.push(friendId);
+    await user.save();
+
+    res.status(201).json({ message: "Friend added", friendId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Remove a friend
+router.delete("/:username/friends/:friendId", auth, async (req, res) => {
+  const { username, friendId } = req.params;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Ensure user is editing their own friends list
+    if (req.user.userId !== user._id.toString())
+      return res.status(403).json({ error: "Unauthorized" });
+
+    const before = user.friends.length;
+    user.friends = user.friends.filter(f => f.toString() !== friendId);
+
+    if (user.friends.length === before)
+      return res.status(404).json({ error: "Friend not found in list" });
+
+    await user.save();
+    res.json({ message: "Friend removed", friendId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 //-------------------------------BACKLOG ROUTES--------------------------------
 
