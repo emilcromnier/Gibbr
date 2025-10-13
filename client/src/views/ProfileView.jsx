@@ -7,6 +7,11 @@ import { observer } from 'mobx-react-lite';
 function Profile(props) {
     const wishlist = props.wishlist;
     const reviews = props.reviews;
+    
+    
+    function InspectGameACB(gameId){
+    window.location.hash = `#/game/${gameId}`;
+  }
   
   
 
@@ -27,14 +32,20 @@ function Profile(props) {
             </ul>
         </div>
         <div className='Wishlist'>
-            <h1>Wishlist</h1>
-            <ul>
-            {wishlist.map((game) => (
-          <li key={game.gameSlug}>
-            {game.gameSlug}
-          </li>
-            ))}
-            </ul>
+                <div>
+      {wishlist.map((game) => (
+        <div className='gameContainer' onClick={() => InspectGameACB(game.id)}>
+        <p>{game.title}</p>
+        <img
+          key={game.id}
+          src={game.image}
+          alt={game.title}
+          style={{ width: '150px', height: '150px', objectFit: 'cover', margin: '8px' }}
+        />
+        </div>
+      ))}
+    </div>
+        
         </div>
 
     </div>

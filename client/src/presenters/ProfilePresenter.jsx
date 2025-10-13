@@ -7,7 +7,7 @@ export default observer(
 function ProfilePresenter(props){
 
     const user = props.model.user.currentUser;
-    console.log("LOADED USER", user);
+
 
 
     if (!user) {
@@ -21,7 +21,12 @@ function ProfilePresenter(props){
         );
     }
 
-    const wishlist = user.backlog || [];
+    props.model.user.fetchWishlistDetails();
+
+
+
+    //const wishlist = user.backlog || [];
+    const wishlist = props.model.user.wishlist || [];
     const reviews = user.reviews || [];
 
 
