@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import Profile from '../views/ProfileView';
+import { useEffect } from 'react';
 
 
 
@@ -7,6 +8,12 @@ export default observer(
 function ProfilePresenter(props){
 
     const user = props.model.user.currentUser;
+    
+    useEffect(() => {
+    if (!user) return;
+    props.model.user.fetchWishlistDetails();
+    props.model.user.fetchMyReviews();
+  }, [user]); // run only when `user` changes
 
 
 
@@ -21,13 +28,17 @@ function ProfilePresenter(props){
         );
     }
 
-    props.model.user.fetchWishlistDetails();
+
 
 
 
     //const wishlist = user.backlog || [];
     const wishlist = props.model.user.wishlist || [];
-    const reviews = user.reviews || [];
+    //const reviews = user.reviews || [];
+    const reviews = props.model.user.reviews || [];
+    if (!wishlist.length) {
+    return <div>Loading wishlist...</div>;
+    }
 
 
     return <Profile username={user.username} description={user.description || "No description yet"} wishlist={wishlist} reviews={reviews}/>;

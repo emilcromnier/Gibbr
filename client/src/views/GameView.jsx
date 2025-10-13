@@ -1,16 +1,46 @@
 import '/src/App.css'
 import { observer } from 'mobx-react-lite';
+import { useState } from 'react';
 
 
 
 
 function Game(props) {
     const game = props.game;
+    const [reviewText, setReviewText] = useState('');
+  const [rating, setRating] = useState(5); // default rating 5
+  const [submitting, setSubmitting] = useState(false);
     
   function handleAddToWishlist() {
 
     props.onAddToWishlist(game);
   }
+
+async function handleSubmitReview(e) {
+  e.preventDefault();
+
+  setSubmitting(true);
+
+  try {
+    // Call the presenter function with the data
+    await props.onSubmitReview({
+      gameSlug: game.slug,
+      reviewText,
+      rating,
+      completed: false, 
+      liked: false      
+    });
+
+    // Clear form on success
+    setReviewText("");
+    setRating(5);
+  } catch (err) {
+    console.error("Failed to submit review:", err);
+    alert("Error submitting review");
+  } finally {
+    setSubmitting(false);
+  }
+}
 
     
 
@@ -23,6 +53,39 @@ function Game(props) {
       <button onClick={handleAddToWishlist}>
         Add to Wishlist
       </button>
+
+            <h2>Submit a Review</h2>
+      <form onSubmit={handleSubmitReview}>
+        <div>
+          <label>Rating:</label>
+          {[1, 2, 3, 4, 5].map((num) => (
+            <label key={num} style={{ margin: "0 5px" }}>
+              <input
+                type="radio"
+                name="rating"
+                value={num}
+                checked={rating === num}
+                onChange={() => setRating(num)}
+              />
+              {num}
+            </label>
+          ))}
+        </div>
+
+        <div style={{ marginTop: "10px" }}>
+          <textarea
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            placeholder="Write your review here..."
+            rows={4}
+            style={{ width: "100%", padding: "5px" }}
+          />
+        </div>
+
+        <button type="submit" disabled={submitting} style={{ marginTop: "10px" }}>
+          {submitting ? 'Submitting...' : 'Submit Review'}
+        </button>
+      </form>
 
     </div>
 

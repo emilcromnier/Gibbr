@@ -24,15 +24,17 @@ function Profile(props) {
         <div className='RecentReviews'>
             <h1>Recent Reviews</h1>
             <ul>
-            {reviews.map((game) => (
-          <li key={game.id}>
-            {game.name}
-          </li>
-            ))}
+{reviews.map((review) => (
+    <li key={review._id} style={{ marginBottom: '10px' }}>
+      <strong>{review.gameSlug}</strong> — ⭐ {review.rating}/5
+      <p>{review.reviewText}</p>
+    </li>
+  ))}
             </ul>
         </div>
         <div className='Wishlist'>
                 <div>
+                    <h1>Wishlist</h1>
       {wishlist.map((game) => (
         <div className='gameContainer' onClick={() => InspectGameACB(game.id)}>
         <p>{game.title}</p>

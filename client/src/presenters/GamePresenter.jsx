@@ -32,6 +32,22 @@ function GamePresenter(props){
 
     }
 
+    async function onSubmitReview({ gameSlug, reviewText, rating }) {
+    if (!userModel.currentUser) {
+      alert("You must be logged in to submit a review.");
+      return;
+    }
+
+    try {
+      // Optional: you could track submission/loading state here
+      console.log("PRESENTER:", gameSlug, reviewText, rating);
+      await userModel.submitReview({gameSlug, reviewText, rating}); // <-- model handles API call
+      alert("Review submitted successfully!");
+    } catch (err) {
+      alert(`Failed to submit review: ${err.message}`);
+    }
+  }
+
 
 
     if(id){
@@ -44,6 +60,6 @@ function GamePresenter(props){
     }
 
 
-    return <Game onAddToWishlist={onAddToWishlist} game={props.model.games.selectedGame}/>;
+    return <Game onSubmitReview={onSubmitReview} onAddToWishlist={onAddToWishlist} game={props.model.games.selectedGame}/>;
     
 })

@@ -9,6 +9,7 @@ export default observer(
     
     
 function GameGridPresenter(props){
+    
     const games = props.model.games.trendingGames;
 
     const placeholderGames = [
