@@ -121,7 +121,7 @@ router.delete("/:username/backlog/:gameSlug", auth, async (req, res) => {
 
 
 // get "currently playing" games
-router.get("/:username/currently-playing", async (req, res) => {
+router.get("/:username/currently-playing", auth, async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -159,7 +159,7 @@ router.post("/:username/currently-playing", auth, async (req, res) => {
   }
 });
 
-// Remove game from currently playing (both on completion or manual remove)
+// Remove game from currently playing (both on completion or manual removal)
 router.delete("/:username/currently-playing/:gameSlug", auth, async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
