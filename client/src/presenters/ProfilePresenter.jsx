@@ -15,7 +15,7 @@ function ProfilePresenter(props){
         <div >
             <h2>You are not logged in</h2>
             <p>
-            <a href="#/login">Log in</a> to see your profile.
+            <a href="#/auth">Log in</a> to see your profile.
             </p>
         </div>
         );
