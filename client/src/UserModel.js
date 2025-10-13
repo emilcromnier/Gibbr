@@ -1,5 +1,7 @@
 // src/models/UserModel.js
 import axios from "axios";
+import { toJS } from "mobx";
+import { searchGames } from "./GameSource";
 
 const BACKEND_URL = "http://localhost:9000/api/auth";
 const API_URL = "http://localhost:9000/api/users";
@@ -119,6 +121,70 @@ async addToWishlist(game, username, token) {
       throw err;
     }
   },
+
+ async fetchGameBySlug(slug) {
+  try {
+    this.loading = true;
+    this.error = null;
+
+    // Use searchGames instead of direct slug route
+    const searchData = await searchGames(slug);
+
+    if (!searchData || !searchData.results || searchData.results.length === 0) {
+      throw new Error(`No game found for slug: ${slug}`);
+    }
+
+    // Try to find exact match by slug in search results
+    const gameData = searchData.results.find(g => g.slug === slug) || searchData.results[0];
+
+    this.selectedGame = {
+      id: gameData.id,
+      slug: gameData.slug,
+      title: gameData.name,
+      description: gameData.description_raw || gameData.description || "No description available",
+      image: gameData.background_image || "https://via.placeholder.com/150",
+      released: gameData.released,
+      rating: gameData.rating,
+      platforms: gameData.platforms?.map(p => p.platform.name) || [],
+      genres: gameData.genres?.map(g => g.name) || [],
+    };
+
+    return this.selectedGame;
+  } catch (err) {
+    console.error("Error fetching game by slug via search:", err);
+    this.error = err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+async fetchWishlistDetails() {
+  if (!this.currentUser?.backlog?.length) return;
+
+  const fetchedGames = [];
+
+  for (const entry of this.currentUser.backlog) {
+    const slug = entry.gameSlug;
+
+    if (this.wishlist.some(g => g.slug === slug)) {
+      console.log(`Skipping slug already in cache: ${slug}`);
+      continue;
+    }
+
+    try {
+      const game = await this.fetchGameBySlug(slug);
+      fetchedGames.push(game);
+    } catch (err) {
+      console.error(`Failed to fetch details for ${slug}:`, err);
+    }
+  }
+
+  // Bulk update once
+  this.wishlist.push(...fetchedGames);
+  console.log("LOCAL WISHLIST: ", this.wishlist);
+}
+
 
 };
 

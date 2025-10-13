@@ -3,18 +3,7 @@ import axios from "axios";
 const BACKEND_URL = "http://localhost:9000/api";
 
 
-export async function searchGames(query) {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/games/search`, {
-      params: { query } // axios automatically encodes this
-    });
-    console.log(response);
-    return response.data;
-  } catch (err) {
-    console.error("Error searching games:", err);
-    throw err;
-  }
-}
+
 
 export async function getGameById(id) {
   try {
@@ -23,6 +12,24 @@ export async function getGameById(id) {
   } catch (err) {
     console.error("Error fetching game by ID:", err);
     throw err;
+  }
+}
+
+export async function getGameBySlug(slug) {
+  const response = await axios.get(`${BACKEND_URL}/games/slug/${slug}`);
+  return response.data;
+}
+
+export async function searchGames(query) {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/games/search`, {
+      params: { query } // Axios automatically encodes this as a query string
+    });
+    console.log(response); // full Axios response, mostly for debugging
+    return response.data;  // the actual search results returned from your backend
+  } catch (err) {
+    console.error("Error searching games:", err);
+    throw err; // propagate error to caller
   }
 }
 

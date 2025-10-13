@@ -1,4 +1,4 @@
-import { searchGames, getTrendingGames, getGameById } from "./GameSource";
+import { searchGames, getTrendingGames, getGameById, getGameBySlug } from "./GameSource";
 
 const GamesModel= {
   loading: false,
@@ -40,7 +40,9 @@ const GamesModel= {
     } finally {
       this.loading = false;
     }
-  }
+  },
+
+
 
   };
 
