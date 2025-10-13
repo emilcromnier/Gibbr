@@ -22,6 +22,11 @@ const UserSchema = new mongoose.Schema({
     password: {  //hash later (bcryptjs or custom?)
         type: String, required: true
     },
+
+    friends: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'User'
+    },
   
     stats: {
         gamesReviewed : { type: Number, default: 0 },
