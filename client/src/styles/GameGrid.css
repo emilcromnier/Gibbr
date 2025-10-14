@@ -1,0 +1,20 @@
+.game-grid {
+    background-color: #6f6262;
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    overflow-x: scroll;
+}
+
+
+.game-grid__container {
+    width: 300px;
+    flex: 0 0 auto;
+    height: fit-content;
+    border: #ffffff solid 2px;
+}
+
+.game-grid__container-img {
+    width: 100%;
+    height: auto;
+}
