@@ -3,10 +3,20 @@ import '/src/styles/navbar.css'
 import { observer } from 'mobx-react-lite';
 import logo from '../assets/GibbR_new_logo.png.png';
 import { Search } from "lucide-react";
+import { useState } from "react";
 
 
 
 function Navbar(props) {
+
+    const [query, setQuery] = useState("");
+
+    
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      props.onSearch(query);
+    }
+  }
 
     function ToFriendsACB(){
         window.location.hash = "#/friends";
@@ -32,7 +42,7 @@ function Navbar(props) {
     
     <nav className = "navbar">
         <div className = "navbar__left">
-            <img className ="navbar__logo" src={logo} alt="Gibbr Logo" />
+            <img className ="navbar__logo" src={logo} alt="Gibbr Logo" onClick={BackToMenuACB} />
         </div>
 
         <div className = "navbar__center">
@@ -44,7 +54,8 @@ function Navbar(props) {
 
         <div classname = "navbar__right">
             <Search className = "navbar__icon"/>
-            <input type = "text" id = "search" placeholder = "Search items..." />
+            <input type = "text" id = "search" placeholder = "Search items..." value={query} onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown} />
         </div>
     </nav>
 
