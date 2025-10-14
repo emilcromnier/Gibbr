@@ -10,7 +10,7 @@ services:
     environment:
       - MONGO_URI=mongodb://root:pass@mongo:27017/gibbr?authSource=admin
       - JWT_SECRET=EmilMatildaAlexPontusGibbr
-      - RAWG_API_KEY=9219098fe86e4b47b7f197f0c64e0bff
+      - RAWG_API_KEY=77d89f43b46a4dfe95c8153ef56e94dc
       - PORT=8080     # app listens on 8080 inside container
     depends_on:
       - mongo
