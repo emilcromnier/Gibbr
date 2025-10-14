@@ -43,7 +43,8 @@ function Navbar(props) {
         </div>
 
         <div classname = "navbar__right">
-            <Search className = "navbar__icon"/> 
+            <Search className = "navbar__icon"/>
+            <input type = "text" id = "search" placeholder = "Search items..." />
         </div>
     </nav>
 
