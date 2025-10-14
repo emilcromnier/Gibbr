@@ -3,10 +3,12 @@ import '/src/styles/navbar.css'
 import { observer } from 'mobx-react-lite';
 import logo from '../assets/GibbR_new_logo.png.png';
 import { Search } from "lucide-react";
+import { useState } from 'react';
 
 
 
 function Navbar(props) {
+    const [showSearch, setShowSearch] = useState(false);
 
     function ToFriendsACB(){
         window.location.hash = "#/friends";
@@ -42,9 +44,11 @@ function Navbar(props) {
             <button className='navbar__button navbar__button--login' onClick={ToAuthACB} >Login</button>
         </div>
 
-        <div classname = "navbar__right">
-            <Search className = "navbar__icon"/>
-            <input type = "text" id = "search" placeholder = "Search items..." />
+        <div className = "navbar__right">
+            <Search className = "navbar__icon" onClick = {() => setShowSearch(prev => !prev)}/>
+            {showSearch && (
+            <input className = "navbar__search--input" type = "text" id = "search" placeholder = "Search items..." />
+            )}
         </div>
     </nav>
 
