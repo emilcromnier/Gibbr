@@ -198,34 +198,48 @@ async addToWishlist(game, username, token) {
     }
   },
 
- async fetchGameBySlug(slug, gamesModel) {
-    console.log("FETCHGAMEBYSLUG ", gamesModel.fetchedGames)
+ async fetchGameBySlug(slug, gamesModel, { fullResults = false } = {}) {
   try {
     this.loading = true;
     this.error = null;
 
-    if (gamesModel) {
-      const cachedGame = gamesModel.fetchedGames.find(
-      game => game.slug === slug
-    );
+    // ✅ First: Check cache
+    if (gamesModel && !fullResults) {
+      const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
         console.log(`Using cached game for slug: ${slug}`);
         this.selectedGame = cachedGame;
         return cachedGame;
       }
     }
+
+    // 🛰️ Fetch from API using your searchGames util
     console.log("Fetching by slug through API");
-    // Use searchGames instead of direct slug route
     const searchData = await searchGames(slug);
 
-    if (!searchData || !searchData.results || searchData.results.length === 0) {
+    if (!searchData?.results?.length) {
       throw new Error(`No game found for slug: ${slug}`);
     }
 
-    // Try to find exact match by slug in search results
+    // 🟡 If fullResults requested, just return the raw array
+    if (fullResults) {
+      return searchData.results.map(gameData => ({
+        id: gameData.id,
+        slug: gameData.slug,
+        title: gameData.name,
+        description: gameData.description_raw || gameData.description || "No description available",
+        image: gameData.background_image || "https://via.placeholder.com/150",
+        released: gameData.released,
+        rating: gameData.rating,
+        platforms: gameData.platforms?.map(p => p.platform.name) || [],
+        genres: gameData.genres?.map(g => g.name) || [],
+      }));
+    }
+
+    // 🟢 Otherwise, return the single match (exact slug or first)
     const gameData = searchData.results.find(g => g.slug === slug) || searchData.results[0];
 
-    this.selectedGame = {
+    const singleGame = {
       id: gameData.id,
       slug: gameData.slug,
       title: gameData.name,
@@ -237,12 +251,43 @@ async addToWishlist(game, username, token) {
       genres: gameData.genres?.map(g => g.name) || [],
     };
 
-    return this.selectedGame;
+    this.selectedGame = singleGame;
+    return singleGame;
+
   } catch (err) {
     this.error = err.message;
     throw err;
   } finally {
     this.loading = false;
+  }
+},
+
+async search(query, gamesModel) {
+  if (!query || query.trim() === "") return null;
+
+  const q = query.trim();
+
+  try {
+    //Try to find user by username
+    const userRes = await axios.get(`${API_URL}/${q}`);
+    console.log("Found user:", userRes.data);
+    return { type: "user", data: userRes.data };
+  } catch (err) {
+    // No user found, fall through to game search
+    if (err.response?.status !== 404) {
+      console.error("Error searching for user:", err);
+      throw err;
+    }
+  }
+
+  try {
+    // 2️⃣ Try to find game by slug using caching
+    const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
+    console.log("Found games:", games);
+    return { type: "game", data: games };
+  } catch (err) {
+    console.error("No user or game found:", err);
+    return null;
   }
 },
 
