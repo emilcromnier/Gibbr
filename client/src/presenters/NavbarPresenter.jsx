@@ -6,17 +6,11 @@ import Navbar from '../views/NavbarView.jsx'
 export default observer(
 function NavbarPresenter(props){
 
-    async function onSearchACB(query) {
-    if (!query.trim()) return;
-
-    try {
-      const result = await props.model.user.search(query, props.model.games);
-      console.log("Search result:", result);
-      
-    } catch (err) {
-      console.error("Search failed:", err);
-    }
-  }
+async function onSearchACB(query) {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    window.location.hash = `#/search/${encodeURIComponent(trimmed)}`;
+}
 
 
     return <Navbar onSearch={onSearchACB}/>;

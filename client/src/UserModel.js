@@ -203,7 +203,7 @@ async addToWishlist(game, username, token) {
     this.loading = true;
     this.error = null;
 
-    // ✅ First: Check cache
+    // First: Check cache
     if (gamesModel && !fullResults) {
       const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
@@ -213,7 +213,7 @@ async addToWishlist(game, username, token) {
       }
     }
 
-    // 🛰️ Fetch from API using your searchGames util
+    // Fetch from API using your searchGames util
     console.log("Fetching by slug through API");
     const searchData = await searchGames(slug);
 
@@ -221,7 +221,7 @@ async addToWishlist(game, username, token) {
       throw new Error(`No game found for slug: ${slug}`);
     }
 
-    // 🟡 If fullResults requested, just return the raw array
+    // If fullResults requested, just return the raw array
     if (fullResults) {
       return searchData.results.map(gameData => ({
         id: gameData.id,
@@ -236,7 +236,8 @@ async addToWishlist(game, username, token) {
       }));
     }
 
-    // 🟢 Otherwise, return the single match (exact slug or first)
+
+    // Otherwise, return the single match (exact slug or first)
     const gameData = searchData.results.find(g => g.slug === slug) || searchData.results[0];
 
     const singleGame = {
@@ -252,6 +253,7 @@ async addToWishlist(game, username, token) {
     };
 
     this.selectedGame = singleGame;
+    gamesModel.fetchedGames.push(singleGame);
     return singleGame;
 
   } catch (err) {
@@ -281,7 +283,7 @@ async search(query, gamesModel) {
   }
 
   try {
-    // 2️⃣ Try to find game by slug using caching
+    // Try to find game by slug using caching
     const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
     console.log("Found games:", games);
     return { type: "game", data: games };
