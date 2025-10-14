@@ -49,9 +49,13 @@ function GamePresenter(props){
   }
 
 
+    if (id) {
 
-    if(id){
-        props.model.games.fetchGameById(id);
+
+        
+    props.model.games.fetchGameById(id);
+        
+   
     }
 
     

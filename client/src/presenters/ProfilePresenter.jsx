@@ -11,8 +11,8 @@ function ProfilePresenter(props){
     
     useEffect(() => {
     if (!user) return;
-    props.model.user.fetchWishlistDetails();
-    props.model.user.fetchMyReviews();
+    props.model.user.fetchWishlistDetails(props.model.games);
+    props.model.user.fetchMyReviews(props.model.games);
   }, [user]); // run only when `user` changes
 
 

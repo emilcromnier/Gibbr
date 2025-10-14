@@ -19,17 +19,29 @@ function Profile(props) {
     <div className='ProfileContainer'>
         <div className='ProfileHead'>
             <h1>{props.username}</h1>
-            <p>{props.description}</p>
         </div>
         <div className='RecentReviews'>
             <h1>Recent Reviews</h1>
             <ul>
-{reviews.map((review) => (
-    <li key={review._id} style={{ marginBottom: '10px' }}>
-      <strong>{review.gameSlug}</strong> — ⭐ {review.rating}/5
-      <p>{review.reviewText}</p>
-    </li>
-  ))}
+            {reviews.map((review) => {
+                const game = review.gameDetails;
+                return (
+                <li key={review._id}>
+                    {game && (
+                    <img src={game.image} alt={game.title} />
+                    )}
+                    <div>
+                    <h3 >
+                        {game ? game.title : review.gameSlug}
+                    </h3>
+                    <div>
+                        {review.rating}/5
+                    </div>
+                    <p>{review.reviewText}</p>
+                    </div>
+                </li>
+                );
+            })}
             </ul>
         </div>
         <div className='Wishlist'>

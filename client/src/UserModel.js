@@ -2,6 +2,7 @@
 import axios from "axios";
 import { toJS } from "mobx";
 import { searchGames } from "./GameSource";
+import GamesModel from "./GamesModel";
 
 const BACKEND_URL = "http://localhost:9000/api/auth";
 const API_URL = "http://localhost:9000/api/users";
@@ -45,7 +46,7 @@ const UserModel = {
   },
 
   // Fetch all reviews for the current user
-  async fetchMyReviews() {
+  async fetchMyReviews(gamesModel) {
   if (!this.token || !this.currentUser) return;
 
   this.loading = true;
@@ -60,8 +61,30 @@ const UserModel = {
       }
     );
 
-    this.reviews = response.data;
-    console.log("Fetched my reviews:", this.reviews);
+    const reviews = response.data;
+
+    // 🧠 Enrich each review with the game's details
+    const enrichedReviews = [];
+    for (const review of reviews) {
+      const slug = review.gameSlug;
+
+      try {
+        // Reuse your existing fetchGameBySlug with caching
+        const game = await this.fetchGameBySlug(slug, gamesModel);
+
+        enrichedReviews.push({
+          ...review,
+          gameDetails: game, // attach game details here
+        });
+      } catch (err) {
+        console.warn(`Failed to load game details for slug ${slug}:`, err);
+        enrichedReviews.push(review); // fallback to raw review
+      }
+    }
+
+    this.reviews = enrichedReviews;
+    console.log("Fetched and enriched my reviews:", this.reviews);
+
     return this.reviews;
   } catch (err) {
     console.error("Failed to fetch reviews:", err);
@@ -175,11 +198,23 @@ async addToWishlist(game, username, token) {
     }
   },
 
- async fetchGameBySlug(slug) {
+ async fetchGameBySlug(slug, gamesModel) {
+    console.log("FETCHGAMEBYSLUG ", gamesModel.fetchedGames)
   try {
     this.loading = true;
     this.error = null;
 
+    if (gamesModel) {
+      const cachedGame = gamesModel.fetchedGames.find(
+      game => game.slug === slug
+    );
+      if (cachedGame) {
+        console.log(`Using cached game for slug: ${slug}`);
+        this.selectedGame = cachedGame;
+        return cachedGame;
+      }
+    }
+    console.log("Fetching by slug through API");
     // Use searchGames instead of direct slug route
     const searchData = await searchGames(slug);
 
@@ -211,7 +246,7 @@ async addToWishlist(game, username, token) {
   }
 },
 
-async fetchWishlistDetails() {
+async fetchWishlistDetails(gamesModel) {
   if (!this.currentUser?.backlog?.length) return;
   this.loading = true;
 
@@ -225,7 +260,7 @@ async fetchWishlistDetails() {
     }
 
     try {
-      const game = await this.fetchGameBySlug(slug);
+      const game = await this.fetchGameBySlug(slug, gamesModel);
       fetchedGames.push(game);
     } catch (err) {
 
