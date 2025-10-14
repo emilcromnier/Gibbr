@@ -63,8 +63,8 @@ UserSchema.virtual("reviews", {
 
  // Removes game from from currentlyPlaying upon completion
 UserSchema.methods.markGameCompleted = async function (gameSlug) {
- 
-  this.currentlyPlaying = this.currentlyPlaying.filter(slug => slug !== gameSlug);
+  // Remove from currentlyPlaying
+  this.currentlyPlaying = this.currentlyPlaying.filter(entry => entry.gameSlug !== gameSlug);
 
   // Increment stats
   this.stats.gamesReviewed += 1;
@@ -72,6 +72,7 @@ UserSchema.methods.markGameCompleted = async function (gameSlug) {
 
   await this.save();
 };
+
 
 
 module.exports = mongoose.model('User', UserSchema);  //node.js export. Apparently node pluralizes the model name to create the collection name

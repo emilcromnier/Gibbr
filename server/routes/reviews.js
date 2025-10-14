@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Review = require("../models/ReviewSchema");
+const User = require("../models/UserSchema");
 const auth = require("../middleware/auth");
 
 // Create review
@@ -59,10 +60,8 @@ router.put("/:reviewId", auth, async (req, res) => {
     if (rating !== undefined) review.rating = rating;
     if (liked !== undefined) review.liked = liked;
 
-    // Handle completion
     if (completed !== undefined) {
       if (!review.completed && completed) {
-        // Marking as completed now
         review.completed = true;
         review.completedAt = new Date();
 
