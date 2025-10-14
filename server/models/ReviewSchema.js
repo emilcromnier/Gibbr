@@ -10,8 +10,8 @@ const ReviewSchema = new mongoose.Schema({
     rating: { type: Number, required: true, min : 0, max:10}, //0-5 scale with halves
     completed : {type: Boolean, default: false},
     completedAt: { type: Date }
-    
-}, { timestamps: true });
+
+}, { timestamps: true, id: false });
 
 // Transform mongo "_id" to reviewId when converting to JSON
 ReviewSchema.set("toJSON", {

@@ -8,12 +8,10 @@ services:
     ports:
       - "9000:8080"
     environment:
-      - MONGO_URI=mongodb://root:pass@mongo:27017/gibbr?authSource=admin
+      - MONGO_URI=mongodb+srv://gibbradmin:skeletonkey@gibbrcluster.uchffb9.mongodb.net/gibbr?retryWrites=true&w=majority
       - JWT_SECRET=EmilMatildaAlexPontusGibbr
       - RAWG_API_KEY=77d89f43b46a4dfe95c8153ef56e94dc
       - PORT=8080     # app listens on 8080 inside container
-    depends_on:
-      - mongo
 
   client:
     build: ./client
@@ -21,18 +19,3 @@ services:
       - "3000:80"
     depends_on:
       - server
-
-  mongo:
-    image: mongo:6
-    container_name: gibbr-mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: pass
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
