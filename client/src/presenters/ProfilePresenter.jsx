@@ -3,10 +3,6 @@ import { observer } from "mobx-react-lite";
 import Profile from "../views/ProfileView";
 import { useEffect } from "react";
 
-export default observer(function ProfilePresenter(props) {
-  const userModel = props.model.user;
-  const user = userModel.currentUser;
-
 
 export default observer(
 function ProfilePresenter(props){
@@ -31,9 +27,6 @@ function ProfilePresenter(props){
       </div>
     );
   }
-
-  const wishlist = userModel.wishlist || [];
-  const reviews = userModel.reviews || [];
 
   async function handleRemoveFromWishlist(game) {
     try {
@@ -61,6 +54,6 @@ function ProfilePresenter(props){
     }
 
 
-    return <Profile username={user.username} description={user.description || "No description yet"} wishlist={wishlist} reviews={reviews}/>;
+    return <Profile username={user.username} description={user.description || "No description yet"} wishlist={wishlist} reviews={reviews} onRemoveFromWishlist={handleRemoveFromWishlist}/>;
     
 })
