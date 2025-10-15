@@ -26,7 +26,6 @@ const GamesModel= {
   },
 
   async fetchGameById(id) {
- 
 
   try {
     this.loading = true;

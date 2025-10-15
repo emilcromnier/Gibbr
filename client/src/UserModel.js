@@ -18,7 +18,7 @@ const UserModel = {
   friends: [],
   currentlyPlaying: [],
   
-  
+
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
     if (!this.token) throw new Error("Not authenticated");
@@ -49,14 +49,14 @@ const UserModel = {
   },
 
   // Fetch all reviews for the current user
-  async fetchReviews(gamesModel, user = this.currentUser) {
+  async fetchMyReviews(gamesModel) {
   if (!this.token || !this.currentUser) return;
 
   this.loading = true;
   this.error = null;
 
   try {
-    const username = user.username;
+    const username = this.currentUser.username;
     const response = await axios.get(
       `${API_URL}/${username}/reviews`,
       {
@@ -234,6 +234,7 @@ async removeFromWishlist(gameOrSlug) {
     this.loading = true;
     this.error = null;
 
+    // First check cache
     if (gamesModel && !fullResults) {
       const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
@@ -282,7 +283,6 @@ async removeFromWishlist(gameOrSlug) {
     };
 
     this.selectedGame = singleGame;
-    gamesModel.fetchedGames.push(singleGame);
     return singleGame;
 
   } catch (err) {
@@ -297,47 +297,38 @@ async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
 
   const q = query.trim();
-  let foundUser = null;
-  let foundGames = [];
 
-  // Try to find user by username
   try {
+    //Try to find user by username
     const userRes = await axios.get(`${API_URL}/${q}`);
     console.log("Found user:", userRes.data);
-    foundUser = userRes.data;
+    return { type: "user", data: userRes.data };
   } catch (err) {
+    // No user found, fall through to game search
     if (err.response?.status !== 404) {
+      console.error("Error searching for user:", err);
+      throw err;
     }
   }
 
-  // Try to find games by slug (even if user search failed or succeeded)
   try {
+    //Try to find game by slug using caching
     const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
     console.log("Found games:", games);
-    foundGames = games;
+    return { type: "game", data: games };
   } catch (err) {
-   
+    console.error("No user or game found:", err);
+    return null;
   }
-
-  // return both results in one object
-  if (!foundUser && (!foundGames || foundGames.length === 0)) {
-    return null; // nothing found
-  }
-
-  return {
-    user: foundUser,    // can be null if not found
-    games: foundGames,  // can be empty []
-  };
 },
 
-
-async fetchWishlistDetails(gamesModel, user = this.currentUser) {
-  if (!user?.backlog?.length) return;
+async fetchWishlistDetails(gamesModel) {
+  if (!this.currentUser?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
-  for (const entry of user.backlog) {
+  for (const entry of this.currentUser.backlog) {
     const slug = entry.gameSlug;
 
     if (this.wishlist.some(g => g.slug === slug)) {
@@ -435,6 +426,5 @@ async removeFriend(username, friendId) {
 
 };
 
-makeAutoObservable(UserModel);
-import { makeAutoObservable } from "mobx";
+
 export default UserModel;

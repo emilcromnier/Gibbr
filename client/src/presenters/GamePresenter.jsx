@@ -1,21 +1,30 @@
 import { observer } from "mobx-react-lite";
-import Game from "../views/GameView";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import Game from "../views/GameView";
 
 export default observer(function GamePresenter(props) {
   const { id } = useParams();
   const userModel = props.model.user;
-  const game = props.model.games.selectedGame;
+  const gamesModel = props.model.games;
+  const game = gamesModel.selectedGame;
 
-  if (id && (!game || game.id !== Number(id))) {
-    props.model.games.fetchGameById(id);
-  }
+  //Fetch game when ID changes
+  useEffect(() => {
+    if (!id) return;
 
-  if (!game) {
+    // Optional: clear old game immediately
+    gamesModel.selectedGame = null;
+
+    gamesModel.fetchGameById(id);
+  }, [id]);
+
+  // Show loading state until the new game arrives
+  if (!game || game.id !== Number(id)) {
     return <div>Loading game details...</div>;
   }
 
-  // ✅ Check if this game (by slug or id) is in the wishlist
+  // Check if the game is in the wishlist
   const isInWishlist =
     userModel.wishlist?.some(
       (g) => g.slug === game.slug || g.id === game.id
@@ -55,7 +64,7 @@ export default observer(function GamePresenter(props) {
       game={game}
       onAddToWishlist={onAddToWishlist}
       onSubmitReview={onSubmitReview}
-      isInWishlist={isInWishlist} // 👈 pass it down
+      isInWishlist={isInWishlist}
     />
   );
 });
