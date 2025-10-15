@@ -16,7 +16,7 @@ export default observer(function GamePresenter(props) {
   const user = userModel.currentUser;
 
   useEffect(() => {
-    if (user) userModel.fetchMyReviews(gamesModel);
+    if (user) userModel.fetchReviews(gamesModel);
   }, [user]);
 
   if (!game || game.id !== Number(id)) {
@@ -39,7 +39,8 @@ export default observer(function GamePresenter(props) {
       return;
     }
 
-    const { username, token } = userModel;
+    const username = userModel.currentUser?.username;
+    const token = userModel.token;
     userModel
       .addToWishlist(game, username, token)
       .then(() => alert(`${game.title} added to wishlist!`))
