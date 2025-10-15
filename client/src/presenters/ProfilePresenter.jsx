@@ -8,6 +8,8 @@ export default observer(
 function ProfilePresenter(props){
 
     const user = props.model.user.currentUser;
+    const loading = props.model.user.loading;
+    const userModel = props.model.user;
     
     useEffect(() => {
     if (!user) return;
@@ -36,8 +38,13 @@ function ProfilePresenter(props){
     const wishlist = props.model.user.wishlist || [];
     //const reviews = user.reviews || [];
     const reviews = props.model.user.reviews || [];
-    if (!wishlist.length) {
+
+    if (loading) {
     return <div>Loading wishlist...</div>;
+    }
+
+    if (!wishlist.length) {
+    return <div>Nothing in wishlist</div>;
     }
 
 
