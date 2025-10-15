@@ -46,14 +46,14 @@ const UserModel = {
   },
 
   // Fetch all reviews for the current user
-  async fetchMyReviews(gamesModel) {
+  async fetchReviews(gamesModel, user = this.currentUser) {
   if (!this.token || !this.currentUser) return;
 
   this.loading = true;
   this.error = null;
 
   try {
-    const username = this.currentUser.username;
+    const username = user.username;
     const response = await axios.get(
       `${API_URL}/${username}/reviews`,
       {
@@ -268,38 +268,47 @@ async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
 
   const q = query.trim();
+  let foundUser = null;
+  let foundGames = [];
 
+  // Try to find user by username
   try {
-    //Try to find user by username
     const userRes = await axios.get(`${API_URL}/${q}`);
     console.log("Found user:", userRes.data);
-    return { type: "user", data: userRes.data };
+    foundUser = userRes.data;
   } catch (err) {
-    // No user found, fall through to game search
     if (err.response?.status !== 404) {
-      console.error("Error searching for user:", err);
-      throw err;
     }
   }
 
+  // Try to find games by slug (even if user search failed or succeeded)
   try {
-    // Try to find game by slug using caching
     const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
     console.log("Found games:", games);
-    return { type: "game", data: games };
+    foundGames = games;
   } catch (err) {
-    console.error("No user or game found:", err);
-    return null;
+   
   }
+
+  // return both results in one object
+  if (!foundUser && (!foundGames || foundGames.length === 0)) {
+    return null; // nothing found
+  }
+
+  return {
+    user: foundUser,    // can be null if not found
+    games: foundGames,  // can be empty []
+  };
 },
 
-async fetchWishlistDetails(gamesModel) {
-  if (!this.currentUser?.backlog?.length) return;
+
+async fetchWishlistDetails(gamesModel, user = this.currentUser) {
+  if (!user?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
-  for (const entry of this.currentUser.backlog) {
+  for (const entry of user.backlog) {
     const slug = entry.gameSlug;
 
     if (this.wishlist.some(g => g.slug === slug)) {
