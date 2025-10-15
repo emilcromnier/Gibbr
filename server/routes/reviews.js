@@ -5,7 +5,6 @@ const User = require("../models/UserSchema");
 const auth = require("../middleware/auth");
 
 // Create review
-// Create review
 router.post("/", auth, async (req, res) => {
   const { gameSlug, reviewText, rating, completed, liked } = req.body;
 
@@ -26,9 +25,7 @@ router.post("/", auth, async (req, res) => {
       if (user) await user.markGameCompleted(gameSlug);
     }
 
-    // Use the schema's toJSON transform to remove _id
-    res.status(201).json(review.toJSON());
-
+    res.status(201).json(review);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

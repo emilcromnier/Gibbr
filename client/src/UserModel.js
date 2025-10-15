@@ -15,6 +15,9 @@ const UserModel = {
   error: null,
   wishlist: [],
   reviews: [],
+  friends: [],
+  currentlyPlaying: [],
+  
 
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
@@ -63,7 +66,7 @@ const UserModel = {
 
     const reviews = response.data;
 
-    // 🧠 Enrich each review with the game's details
+    // Enrich each review with the game's details
     const enrichedReviews = [];
     for (const review of reviews) {
       const slug = review.gameSlug;
@@ -174,6 +177,11 @@ async restoreSession() {
     });
 
     this.currentUser = response.data;
+
+    // populate friends observable
+    this.friends = await this.fetchFriends(this.currentUser.username);
+
+
   } catch (err) {
     this.logout(); // token may have expired
   }
@@ -203,7 +211,7 @@ async addToWishlist(game, username, token) {
     this.loading = true;
     this.error = null;
 
-    // ✅ First: Check cache
+    // First check cache
     if (gamesModel && !fullResults) {
       const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
@@ -213,7 +221,7 @@ async addToWishlist(game, username, token) {
       }
     }
 
-    // 🛰️ Fetch from API using your searchGames util
+    // Fetch from API using your searchGames util
     console.log("Fetching by slug through API");
     const searchData = await searchGames(slug);
 
@@ -221,7 +229,7 @@ async addToWishlist(game, username, token) {
       throw new Error(`No game found for slug: ${slug}`);
     }
 
-    // 🟡 If fullResults requested, just return the raw array
+    // If fullResults requested, just return the raw array
     if (fullResults) {
       return searchData.results.map(gameData => ({
         id: gameData.id,
@@ -236,7 +244,7 @@ async addToWishlist(game, username, token) {
       }));
     }
 
-    // 🟢 Otherwise, return the single match (exact slug or first)
+    // Otherwise, return the single match (exact slug or first)
     const gameData = searchData.results.find(g => g.slug === slug) || searchData.results[0];
 
     const singleGame = {
@@ -281,7 +289,7 @@ async search(query, gamesModel) {
   }
 
   try {
-    // 2️⃣ Try to find game by slug using caching
+    //Try to find game by slug using caching
     const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
     console.log("Found games:", games);
     return { type: "game", data: games };
@@ -315,9 +323,85 @@ async fetchWishlistDetails(gamesModel) {
   // Bulk update once
   this.wishlist.push(...fetchedGames);
   this.loading = false;
-}
+},
+
+// ==================== FRIENDS ====================
+
+async fetchFriends(username) {
+  if (!username) throw new Error("Username required");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.get(`${API_URL}/${username}/friends`);
+    return response.data; // Array of { _id, username }
+  } catch (err) {
+    console.error("Failed to fetch friends:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+async addFriend(username, friendId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/${username}/friends`,
+      { friendId },
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }
+    );
+
+    console.log("Friend added:", response.data);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to add friend:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+async removeFriend(username, friendId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.delete(
+      `${API_URL}/${username}/friends/${friendId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }
+    );
+
+    console.log("Friend removed:", response.data);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to remove friend:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
 
 
 };
+
 
 export default UserModel;
