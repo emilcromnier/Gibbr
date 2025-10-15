@@ -47,7 +47,7 @@ export default observer(
             },
             {
                 path: "/friends",
-                element: <div className="general"><NavbarPresenter model={model}/> <FriendsPresenter/> </div>
+                element: <div className="general"><NavbarPresenter model={model}/> <FriendsPresenter model={model}/> </div>
             },
                         {
                 path: "/profile",

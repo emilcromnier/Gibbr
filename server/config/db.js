@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
-// Use your Atlas URI directly (or store in .env as MONGO_URI)
-//const MONGO_URI = "mongodb+srv://gibbradmin:skeletonkey@gibbrcluster.uchffb9.mongodb.net/gibbr?retryWrites=true&w=majority";
+// Uses MONGO Atlas URI from compose file
 
 async function connectDB() {
   try {
