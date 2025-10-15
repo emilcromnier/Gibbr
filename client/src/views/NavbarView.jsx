@@ -1,7 +1,7 @@
 import '/src/App.css'
 import '/src/styles/navbar.css'
 import { observer } from 'mobx-react-lite';
-import logo from '../assets/GibbR_new_logo.png.png';
+import logo from '../assets/GibbR.svg';
 import { Search } from "lucide-react";
 import { useState } from 'react';
 
@@ -35,13 +35,11 @@ function Navbar(props) {
     <nav className = "navbar">
         <div className = "navbar__left">
             <img className ="navbar__logo" src={logo} alt="Gibbr Logo" />
-        </div>
-
-        <div className = "navbar__center">
-            <button className="navbar__button navbar__button--home" onClick={BackToMenuACB} >Home</button>
-            <button className="navbar__button navbar__button--friends" onClick={ToFriendsACB}>Friends</button>
-            <button className="navbar__button navbar__button--profile" onClick={ToProfileACB}>Profile</button>        
-            <button className='navbar__button navbar__button--login' onClick={ToAuthACB} >Login</button>
+            <div className = "navbar__center">
+                <button className="navbar__button navbar__button--home" onClick={BackToMenuACB} >Home</button>
+                <button className="navbar__button navbar__button--friends" onClick={ToFriendsACB}>Friends</button>
+                <button className="navbar__button navbar__button--profile" onClick={ToProfileACB}>Profile</button>        
+            </div>
         </div>
 
         <div className = "navbar__right">
@@ -49,6 +47,7 @@ function Navbar(props) {
             {showSearch && (
             <input className = "navbar__search--input" type = "text" id = "search" placeholder = "Search items..." />
             )}
+            <button className='navbar__button navbar__button--login' onClick={ToAuthACB} >Login</button>
         </div>
     </nav>
 

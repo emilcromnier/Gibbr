@@ -1,37 +1,54 @@
 .navbar {
     display: flex;
     align-items: center;
-    background-color: #333;
-    padding: 10px;
+    background-color: #111;
+    color: white;
+    padding: 0 2rem;
     justify-content: space-between;
+    height: 70px;
 }
 
 .navbar__logo {
-    height: 50px;
-    margin-right: 20px;
+    height: 40px;
+    width:  auto;
 }
 
 .navbar__center {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;;
+    gap: 1rem;
+}
+
+.navbar__left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 0 1 auto;
+    gap: 2.5rem;
 }
 
 .navbar__right {
     display: flex;
     align-items: center;
-    gap: 8px;
-    position: relative;
+    justify-content: flex-end;
+    flex: 0 1 auto;
+    gap: 10px;
 }
 
 .navbar__button {
-    background-color: #555;
-    color: white;
+    flex: 0 1 auto;
+    background: none;
+    position: relative;
+    color: rgba(255, 255, 255, 0.85);
     border: none;
-    padding: 10px 15px;
-    margin: 0 5px;
+    font-size: 1rem;
+    padding: 12px 20px;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border-radius: 1px;
+    height: 100%;
 }
 
 .navbar__icon {
@@ -41,11 +58,31 @@
 }
 
 .navbar__button:hover {
-    background-color: #777;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .navbar__icon:hover {
     transform: scale(1.1)
+}
+
+.navbar__button--login:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+.navbar__button:focus {
+    outline: none;
+}
+
+.navbar__button--login {
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 6px 14px;
+    margin-left: 10px;
+    transition: all 0.3s ease;
 }
 
 .navbar__search--input {
@@ -56,4 +93,5 @@
     color: white;
     outline: none;
     transition: all 0.3s ease;
+    width: clamp(100px, 15vw, 200px);
 }
