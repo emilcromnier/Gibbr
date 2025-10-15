@@ -27,7 +27,7 @@ export default observer(function GamePresenter(props) {
       return;
     }
 
-    const username = userModel.currentUser.username;
+    const username = userModel.currentUser?.username;
     const token = userModel.token;
 
     userModel

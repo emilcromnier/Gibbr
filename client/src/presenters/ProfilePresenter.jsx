@@ -3,14 +3,18 @@ import { observer } from "mobx-react-lite";
 import Profile from "../views/ProfileView";
 import { useEffect } from "react";
 
-export default observer(function ProfilePresenter(props) {
-  const userModel = props.model.user;
-  const user = userModel.currentUser;
 
-  useEffect(() => {
+export default observer(
+function ProfilePresenter(props){
+
+    const user = props.model.user.currentUser;
+    const loading = props.model.user.loading;
+    const userModel = props.model.user;
+    
+    useEffect(() => {
     if (!user) return;
-    userModel.fetchWishlistDetails(props.model.games);
-    userModel.fetchMyReviews(props.model.games);
+    props.model.user.fetchWishlistDetails(props.model.games);
+    props.model.user.fetchReviews(props.model.games);
   }, [user]); // run only when `user` changes
 
   if (!user) {
@@ -36,15 +40,13 @@ export default observer(function ProfilePresenter(props) {
 
   if (!wishlist.length) {
     return <div>Loading wishlist...</div>;
-  }
+    }
 
-  return (
-    <Profile
-      username={user.username}
-      description={user.description || "No description yet"}
-      wishlist={wishlist}
-      reviews={reviews}
-      onRemoveFromWishlist={handleRemoveFromWishlist}
-    />
-  );
-});
+    if (!wishlist.length) {
+    return <div>Nothing in wishlist</div>;
+    }
+
+
+    return <Profile username={user.username} description={user.description || "No description yet"} wishlist={wishlist} reviews={reviews} onRemoveFromWishlist={handleRemoveFromWishlist}/>;
+    
+})
