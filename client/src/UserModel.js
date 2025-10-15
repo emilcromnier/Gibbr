@@ -18,7 +18,7 @@ const UserModel = {
   friends: [],
   currentlyPlaying: [],
   
-
+  
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
     if (!this.token) throw new Error("Not authenticated");
@@ -412,5 +412,6 @@ async removeFriend(username, friendId) {
 
 };
 
-
+makeAutoObservable(UserModel);
+import { makeAutoObservable } from "mobx";
 export default UserModel;

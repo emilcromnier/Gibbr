@@ -9,15 +9,18 @@ import { useState } from 'react';
 
 function Navbar(props) {
     const [showSearch, setShowSearch] = useState(false);
-
     const [query, setQuery] = useState("");
 
+    console.log("🔹 Navbar rendered");
+    console.log("🔹 props.currentUser:", props.currentUser);
+    console.log("🔹 currentUser type:", typeof props.currentUser);
+    console.log("🔹 currentUser keys:", props.currentUser ? Object.keys(props.currentUser) : "null");
     
-  function handleKeyDown(e) {
-    if (e.key === "Enter") {
-      props.onSearch(query);
+    function handleKeyDown(e) {
+        if (e.key === "Enter") {
+            props.onSearch(query);
+        }
     }
-  }
 
     function ToFriendsACB(){
         window.location.hash = "#/friends";
@@ -33,8 +36,18 @@ function Navbar(props) {
         window.location.hash = "#/profile"
     }
 
-        function ToAuthACB(){
+    function ToAuthACB(){
         window.location.hash = "#/auth"
+    }
+
+    function LoginLogoutACB(){
+        if (props.currentUser) {
+            props.onLogout();
+            window.location.hash = "#/menu";
+        }
+        else {
+            ToAuthACB();
+        } 
     }
 
     
@@ -55,16 +68,12 @@ function Navbar(props) {
         <div className = "navbar__right">
             <Search className = "navbar__icon" onClick = {() => setShowSearch(prev => !prev)}/>
             {showSearch && (
-            <input className = "navbar__search--input" type = "text" id = "search" placeholder = "Search items..." />
+            <input className = "navbar__search--input" type = "text" id = "search" placeholder = "Search items..." value={query} onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}/>
             )}
-            <button className='navbar__button navbar__button--login' onClick={ToAuthACB} >Login</button>
+           <button className='navbar__button navbar__button--login' onClick={LoginLogoutACB} >{props.currentUser ? "Logout" : "Login"} </button>
         </div>
 
-        <div classname = "navbar__right">
-            <Search className = "navbar__icon"/>
-            <input type = "text" id = "search" placeholder = "Search items..." value={query} onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown} />
-        </div>
     </nav>
 
 
