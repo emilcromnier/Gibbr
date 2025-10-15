@@ -206,6 +206,34 @@ async addToWishlist(game, username, token) {
     }
   },
 
+
+  // inside UserModel (same file as addToWishlist)
+async removeFromWishlist(game, username, token) {
+  try {
+    // Use the same API_URL you used for addToWishlist
+    const response = await axios.delete(
+      `${API_URL}/${username}/backlog/${encodeURIComponent(game.slug)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Update MobX observable state: remove the game locally
+    // Use assignment so MobX detects change if your model is observable
+    this.wishlist = (this.wishlist || []).filter(g => g.slug !== game.slug);
+
+    console.log("Removed from wishlist:", response.data);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to remove from wishlist:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  }
+},
+
+
  async fetchGameBySlug(slug, gamesModel, { fullResults = false } = {}) {
   try {
     this.loading = true;
