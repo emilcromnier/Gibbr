@@ -11,6 +11,7 @@ import FriendsPresenter from './presenters/FriendsPresenter.jsx';
 import ProfilePresenter from './presenters/ProfilePresenter.jsx';
 
 import GamePresenter from './presenters/GamePresenter.jsx';
+import SearchPresenter from './presenters/SearchPresenter.jsx';
 import {  createHashRouter,  RouterProvider, useParams} from "react-router-dom";
 import AuthPresenter from './presenters/AuthPresenter.jsx';
 
@@ -38,28 +39,33 @@ export default observer(
         return createHashRouter([
             {
                 path: "/",
-                element: <div className="general"><NavbarPresenter/> <GameGridPresenter model={model}/> </div>
+                element: <div className="general"><NavbarPresenter model={model}/> <GameGridPresenter model={model}/> </div>
             },
             {
                 path: "/menu",
-                element: <div className="general"><NavbarPresenter/> <GameGridPresenter model={model}/> </div>
+                element: <div className="general"><NavbarPresenter model={model}/> <GameGridPresenter model={model}/> </div>
             },
             {
                 path: "/friends",
-                element: <div className="general"><NavbarPresenter/> <FriendsPresenter/> </div>
+                element: <div className="general"><NavbarPresenter model={model}/> <FriendsPresenter model={model}/> </div>
             },
                         {
                 path: "/profile",
-                element: <div className="general"><NavbarPresenter/> <ProfilePresenter model={model}/> </div>
+                element: <div className="general"><NavbarPresenter model={model}/> <ProfilePresenter model={model}/> </div>
             },
             {
                 path: "/game/:id", // Dynamic route for individual games
-                element: <div className="general"><NavbarPresenter /> <GamePresenter model={model} /></div>
+                element: <div className="general"><NavbarPresenter model={model} /> <GamePresenter model={model} /></div>
             },
                         {
                 path: "/auth", 
-                element: <div className="general"><NavbarPresenter /> <AuthPresenter model={model} /></div>
+                element: <div className="general"><NavbarPresenter model={model} /> <AuthPresenter model={model} /></div>
             },
+            {
+  path: "/search/:query",
+  element: <div className="general"> <NavbarPresenter model={model} /> <SearchPresenter model={model} /> </div>
+  
+},
 
 
             

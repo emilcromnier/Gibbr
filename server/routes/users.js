@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/UserSchema");
-//const Review = require("../models/ReviewSchema");
+const Review = require("../models/ReviewSchema");
 const auth = require("../middleware/auth");
 
 // Get user by username
@@ -26,6 +26,34 @@ router.get("/:username/reviews", async (req, res) => {
   }
 });
 
+// DELETE user account
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Only the user themselves or an admin can delete
+    if (req.user.userId !== userId && !req.user.isAdmin) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Delete all reviews by this user
+    await Review.deleteMany({ userId });
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ message: `User '${user.username}' and their data deleted successfully` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//------------DIARY ROUTES----------------
+
 // Get user's game diary (chronological list)
 router.get("/:username/diary", async (req, res) => {
   try {
@@ -45,22 +73,96 @@ router.get("/:username/diary", async (req, res) => {
   }
 });
 
-router.get("/:username/backlog", async (req, res) => {
-  const { username } = req.params;
 
+// ------------------------------ FRIENDS ROUTES ------------------------------
+
+// Get users friends list (id and username only)
+router.get("/:username/friends", async (req, res) => {
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: req.params.username })
+      .populate("friends", "_id username"); // only _id and username
+
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Return only the slugs — addedAt is internal
-    const backlog = user.backlog.map(item => item.gameSlug);
-    res.json({ backlog });
+    res.json(user.friends);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// Add a friend
+router.post("/:username/friends", auth, async (req, res) => {
+  const { username } = req.params;
+  const { friendId } = req.body; // ID of the friend to add
+
+  if (!friendId) return res.status(400).json({ error: "friendId is required" });
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (req.user.userId !== user._id.toString())
+      return res.status(403).json({ error: "Unauthorized" });
+
+    // Prevent adding duplicates or self
+    if (user.friends.includes(friendId))
+      return res.status(400).json({ error: "Already friends" });
+    if (friendId === user._id.toString())
+      return res.status(400).json({ error: "Cannot add yourself" });
+
+    user.friends.push(friendId);
+    await user.save();
+
+    res.status(201).json({ message: "Friend added", friendId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Remove a friend
+router.delete("/:username/friends/:friendId", auth, async (req, res) => {
+  const { username, friendId } = req.params;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Ensure user is editing their own friends list
+    if (req.user.userId !== user._id.toString())
+      return res.status(403).json({ error: "Unauthorized" });
+
+    const before = user.friends.length;
+    user.friends = user.friends.filter(f => f.toString() !== friendId);
+
+    if (user.friends.length === before)
+      return res.status(404).json({ error: "Friend not found in list" });
+
+    await user.save();
+    res.json({ message: "Friend removed", friendId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 //-------------------------------BACKLOG ROUTES--------------------------------
+
+// Get user's backlog (public, no auth required)
+router.get("/:username/backlog", async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const backlogGames = user.backlog.map(entry => entry.gameSlug);
+
+    res.json(backlogGames);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 // Add game to backlog
 router.post("/:username/backlog", auth, async (req, res) => {
@@ -98,7 +200,7 @@ router.delete("/:username/backlog/:gameSlug", auth, async (req, res) => {
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Ensure user owns this backlog
+    // Ensure user owns backlog
     if (req.user.userId !== user._id.toString())
       return res.status(403).json({ error: "Unauthorized" });
 
@@ -121,7 +223,7 @@ router.delete("/:username/backlog/:gameSlug", auth, async (req, res) => {
 
 
 // get "currently playing" games
-router.get("/:username/currently-playing", auth, async (req, res) => {
+router.get("/:username/currently-playing", async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -182,8 +284,6 @@ router.delete("/:username/currently-playing/:gameSlug", auth, async (req, res) =
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 
 module.exports = router;

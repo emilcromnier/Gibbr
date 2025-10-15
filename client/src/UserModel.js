@@ -15,6 +15,9 @@ const UserModel = {
   error: null,
   wishlist: [],
   reviews: [],
+  friends: [],
+  currentlyPlaying: [],
+  
 
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
@@ -46,14 +49,14 @@ const UserModel = {
   },
 
   // Fetch all reviews for the current user
-  async fetchMyReviews(gamesModel) {
+  async fetchReviews(gamesModel, user = this.currentUser) {
   if (!this.token || !this.currentUser) return;
 
   this.loading = true;
   this.error = null;
 
   try {
-    const username = this.currentUser.username;
+    const username = user.username;
     const response = await axios.get(
       `${API_URL}/${username}/reviews`,
       {
@@ -63,7 +66,7 @@ const UserModel = {
 
     const reviews = response.data;
 
-    // 🧠 Enrich each review with the game's details
+    // Enrich each review with the game's details
     const enrichedReviews = [];
     for (const review of reviews) {
       const slug = review.gameSlug;
@@ -174,6 +177,11 @@ async restoreSession() {
     });
 
     this.currentUser = response.data;
+
+    // populate friends observable
+    this.friends = await this.fetchFriends(this.currentUser.username);
+
+
   } catch (err) {
     this.logout(); // token may have expired
   }
@@ -198,34 +206,47 @@ async addToWishlist(game, username, token) {
     }
   },
 
- async fetchGameBySlug(slug, gamesModel) {
-    console.log("FETCHGAMEBYSLUG ", gamesModel.fetchedGames)
+ async fetchGameBySlug(slug, gamesModel, { fullResults = false } = {}) {
   try {
     this.loading = true;
     this.error = null;
 
-    if (gamesModel) {
-      const cachedGame = gamesModel.fetchedGames.find(
-      game => game.slug === slug
-    );
+    if (gamesModel && !fullResults) {
+      const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
         console.log(`Using cached game for slug: ${slug}`);
         this.selectedGame = cachedGame;
         return cachedGame;
       }
     }
+
+    // Fetch from API using your searchGames util
     console.log("Fetching by slug through API");
-    // Use searchGames instead of direct slug route
     const searchData = await searchGames(slug);
 
-    if (!searchData || !searchData.results || searchData.results.length === 0) {
+    if (!searchData?.results?.length) {
       throw new Error(`No game found for slug: ${slug}`);
     }
 
-    // Try to find exact match by slug in search results
+    // If fullResults requested, just return the raw array
+    if (fullResults) {
+      return searchData.results.map(gameData => ({
+        id: gameData.id,
+        slug: gameData.slug,
+        title: gameData.name,
+        description: gameData.description_raw || gameData.description || "No description available",
+        image: gameData.background_image || "https://via.placeholder.com/150",
+        released: gameData.released,
+        rating: gameData.rating,
+        platforms: gameData.platforms?.map(p => p.platform.name) || [],
+        genres: gameData.genres?.map(g => g.name) || [],
+      }));
+    }
+
+    // Otherwise, return the single match (exact slug or first)
     const gameData = searchData.results.find(g => g.slug === slug) || searchData.results[0];
 
-    this.selectedGame = {
+    const singleGame = {
       id: gameData.id,
       slug: gameData.slug,
       title: gameData.name,
@@ -237,7 +258,10 @@ async addToWishlist(game, username, token) {
       genres: gameData.genres?.map(g => g.name) || [],
     };
 
-    return this.selectedGame;
+    this.selectedGame = singleGame;
+    gamesModel.fetchedGames.push(singleGame);
+    return singleGame;
+
   } catch (err) {
     this.error = err.message;
     throw err;
@@ -246,13 +270,51 @@ async addToWishlist(game, username, token) {
   }
 },
 
-async fetchWishlistDetails(gamesModel) {
-  if (!this.currentUser?.backlog?.length) return;
+async search(query, gamesModel) {
+  if (!query || query.trim() === "") return null;
+
+  const q = query.trim();
+  let foundUser = null;
+  let foundGames = [];
+
+  // Try to find user by username
+  try {
+    const userRes = await axios.get(`${API_URL}/${q}`);
+    console.log("Found user:", userRes.data);
+    foundUser = userRes.data;
+  } catch (err) {
+    if (err.response?.status !== 404) {
+    }
+  }
+
+  // Try to find games by slug (even if user search failed or succeeded)
+  try {
+    const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
+    console.log("Found games:", games);
+    foundGames = games;
+  } catch (err) {
+   
+  }
+
+  // return both results in one object
+  if (!foundUser && (!foundGames || foundGames.length === 0)) {
+    return null; // nothing found
+  }
+
+  return {
+    user: foundUser,    // can be null if not found
+    games: foundGames,  // can be empty []
+  };
+},
+
+
+async fetchWishlistDetails(gamesModel, user = this.currentUser) {
+  if (!user?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
-  for (const entry of this.currentUser.backlog) {
+  for (const entry of user.backlog) {
     const slug = entry.gameSlug;
 
     if (this.wishlist.some(g => g.slug === slug)) {
@@ -270,9 +332,85 @@ async fetchWishlistDetails(gamesModel) {
   // Bulk update once
   this.wishlist.push(...fetchedGames);
   this.loading = false;
-}
+},
+
+// ==================== FRIENDS ====================
+
+async fetchFriends(username) {
+  if (!username) throw new Error("Username required");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.get(`${API_URL}/${username}/friends`);
+    return response.data; // Array of { _id, username }
+  } catch (err) {
+    console.error("Failed to fetch friends:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+async addFriend(username, friendId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/${username}/friends`,
+      { friendId },
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }
+    );
+
+    console.log("Friend added:", response.data);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to add friend:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+async removeFriend(username, friendId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.delete(
+      `${API_URL}/${username}/friends/${friendId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }
+    );
+
+    console.log("Friend removed:", response.data);
+    return response.data;
+  } catch (err) {
+    console.error("Failed to remove friend:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
 
 
 };
+
 
 export default UserModel;

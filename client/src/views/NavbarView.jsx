@@ -10,6 +10,15 @@ import { useState } from 'react';
 function Navbar(props) {
     const [showSearch, setShowSearch] = useState(false);
 
+    const [query, setQuery] = useState("");
+
+    
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      props.onSearch(query);
+    }
+  }
+
     function ToFriendsACB(){
         window.location.hash = "#/friends";
     
@@ -34,7 +43,8 @@ function Navbar(props) {
     
     <nav className = "navbar">
         <div className = "navbar__left">
-            <img className ="navbar__logo" src={logo} alt="Gibbr Logo" />
+
+            <img className ="navbar__logo" src={logo} alt="Gibbr Logo" onClick={BackToMenuACB}/>
             <div className = "navbar__center">
                 <button className="navbar__button navbar__button--home" onClick={BackToMenuACB} >Home</button>
                 <button className="navbar__button navbar__button--friends" onClick={ToFriendsACB}>Friends</button>
@@ -48,6 +58,12 @@ function Navbar(props) {
             <input className = "navbar__search--input" type = "text" id = "search" placeholder = "Search items..." />
             )}
             <button className='navbar__button navbar__button--login' onClick={ToAuthACB} >Login</button>
+        </div>
+
+        <div classname = "navbar__right">
+            <Search className = "navbar__icon"/>
+            <input type = "text" id = "search" placeholder = "Search items..." value={query} onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown} />
         </div>
     </nav>
 

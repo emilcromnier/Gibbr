@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Review = require("../models/ReviewSchema");
+const User = require("../models/UserSchema");
 const auth = require("../middleware/auth");
 
 // Create review
@@ -32,10 +33,10 @@ router.post("/", auth, async (req, res) => {
 
 
 
-//get by rating
-router.get("/popular", async (req, res) => {
+// Get all reviews by recency
+router.get("/recent", async (req, res) => {
   try {
-    const reviews = await Review.find().sort({ rating: -1 });
+    const reviews = await Review.find().sort({ createdAt: -1 }); // newest first
     res.json(reviews);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -59,10 +60,8 @@ router.put("/:reviewId", auth, async (req, res) => {
     if (rating !== undefined) review.rating = rating;
     if (liked !== undefined) review.liked = liked;
 
-    // Handle completion
     if (completed !== undefined) {
       if (!review.completed && completed) {
-        // Marking as completed now
         review.completed = true;
         review.completedAt = new Date();
 
@@ -91,24 +90,27 @@ router.delete("/:reviewId", auth, async (req, res) => {
 
   try {
     const review = await Review.findById(reviewId);
-
     if (!review) return res.status(404).json({ error: "Review not found" });
 
-    // Make sure the user owns this review
-    if (review.userId.toString() !== req.user.userId) {
+    // owner and admin can delete reviews
+    if (review.userId.toString() !== req.user.userId && !req.user.isAdmin) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     await Review.deleteOne({ _id: reviewId });
 
-    await User.findByIdAndUpdate(req.user.userId, { $inc: { "stats.gamesReviewed": -1 } }); //decrease in mongo
+    // Decrement stats for the review owner
+    const user = await User.findById(review.userId);
+    if (user) {
+      user.stats.gamesReviewed = Math.max(0, user.stats.gamesReviewed - 1);
+      await user.save();
+    }
 
     res.json({ message: "Review deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 
 module.exports = router;

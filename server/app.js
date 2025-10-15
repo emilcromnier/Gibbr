@@ -30,4 +30,9 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/users", userRoutes);
 
+// Mock games route for testing
+const mockGamesRoute = require("./tests/get-mock-games");
+app.use("/api/mock-games", mockGamesRoute);
+
+
 module.exports = app;
