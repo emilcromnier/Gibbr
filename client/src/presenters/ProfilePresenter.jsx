@@ -27,13 +27,12 @@ export default observer(function ProfilePresenter(props) {
   const wishlist = userModel.wishlist || [];
   const reviews = userModel.reviews || [];
 
-  async function handleRemoveFromWishlist(game) {
-    try {
-      await userModel.removeFromWishlist(game, user.username, userModel.token);
-    } catch (err) {
-      console.error("Error removing from wishlist:", err);
-    }
-  }
+  function handleRemoveFromWishlist(game) {
+  userModel.removeFromWishlist(game)
+    .then(() => alert(`${game.title} removed from wishlist!`))
+    .catch(err => alert(`Error removing from wishlist: ${err.message}`));
+}
+
 
   if (!wishlist.length) {
     return <div>Loading wishlist...</div>;

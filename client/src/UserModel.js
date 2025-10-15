@@ -187,48 +187,43 @@ async restoreSession() {
   }
 },
 
-async addToWishlist(game, username, token) {
-    try {
-      const response = await axios.post(
-        `${API_URL}/${username}/backlog`,
-        { gameSlug: game.slug },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+async addToWishlist(game) {
+  if (!this.currentUser) throw new Error("Not authenticated");
 
-      this.wishlist.push(game); // update MobX state (optional)
-    } catch (err) {
-      this.error = err.response?.data?.error || err.message;
-      throw err;
-    }
-  },
+  const username = this.currentUser.username;
 
-
-  // inside UserModel (same file as addToWishlist)
-async removeFromWishlist(game, username, token) {
   try {
-    // Use the same API_URL you used for addToWishlist
-    const response = await axios.delete(
-      `${API_URL}/${username}/backlog/${encodeURIComponent(game.slug)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    await axios.post(
+      `${API_URL}/${username}/backlog`,
+      { gameSlug: game.slug },
+      { headers: { Authorization: `Bearer ${this.token}` } }
     );
 
-    // Update MobX observable state: remove the game locally
-    // Use assignment so MobX detects change if your model is observable
-    this.wishlist = (this.wishlist || []).filter(g => g.slug !== game.slug);
-
-    console.log("Removed from wishlist:", response.data);
-    return response.data;
+    this.wishlist.push(game); // update MobX state
   } catch (err) {
-    console.error("Failed to remove from wishlist:", err);
     this.error = err.response?.data?.error || err.message;
+    throw err;
+  }
+},
+
+
+async removeFromWishlist(gameOrSlug) {
+  if (!this.currentUser) throw new Error("Not authenticated");
+
+  const username = this.currentUser.username;
+  // Accept either a game object or slug string
+  const gameSlug = typeof gameOrSlug === "string" ? gameOrSlug : gameOrSlug.slug;
+
+  try {
+    await axios.delete(`${API_URL}/${username}/backlog/${gameSlug}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+
+    // Remove from local MobX state
+    this.wishlist = this.wishlist.filter(g => g.slug !== gameSlug);
+  } catch (err) {
+    this.error = err.response?.data?.error || err.message;
+    console.error("Error removing from wishlist:", err);
     throw err;
   }
 },

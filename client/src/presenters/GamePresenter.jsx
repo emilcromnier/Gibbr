@@ -1,45 +1,35 @@
 import { observer } from "mobx-react-lite";
 import Game from "../views/GameView";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
 
 export default observer(function GamePresenter(props) {
   const { id } = useParams();
   const userModel = props.model.user;
-  const gamesModel = props.model.games;
+  const game = props.model.games.selectedGame;
 
-  useEffect(() => {
-    if (id) gamesModel.fetchGameById(id);
-  }, [id]);
+  if (id && (!game || game.id !== Number(id))) {
+    props.model.games.fetchGameById(id);
+  }
 
-  const game = gamesModel.selectedGame;
-  const user = userModel.currentUser;
-
-  useEffect(() => {
-    if (user) userModel.fetchMyReviews(gamesModel);
-  }, [user]);
-
-  if (!game || game.id !== Number(id)) {
+  if (!game) {
     return <div>Loading game details...</div>;
   }
 
-  // --- FIND EXISTING REVIEW ---
-  const existingReview = userModel.reviews.find(
-    (r) =>
-      r.gameSlug?.toLowerCase().replace(/[^a-z0-9]/g, "") ===
-      game.slug?.toLowerCase().replace(/[^a-z0-9]/g, "")
-  );
-
-  console.log("Game slug:", game.slug);
-  console.log("Existing review found:", existingReview);
+  // ✅ Check if this game (by slug or id) is in the wishlist
+  const isInWishlist =
+    userModel.wishlist?.some(
+      (g) => g.slug === game.slug || g.id === game.id
+    ) || false;
 
   function onAddToWishlist(game) {
-    if (!user) {
+    if (!userModel.currentUser) {
       alert("You must be logged in to add games to your wishlist.");
       return;
     }
 
-    const { username, token } = userModel;
+    const username = userModel.currentUser.username;
+    const token = userModel.token;
+
     userModel
       .addToWishlist(game, username, token)
       .then(() => alert(`${game.title} added to wishlist!`))
@@ -47,7 +37,7 @@ export default observer(function GamePresenter(props) {
   }
 
   async function onSubmitReview({ gameSlug, reviewText, rating }) {
-    if (!user) {
+    if (!userModel.currentUser) {
       alert("You must be logged in to submit a review.");
       return;
     }
@@ -63,9 +53,9 @@ export default observer(function GamePresenter(props) {
   return (
     <Game
       game={game}
-      existingReview={existingReview}
-      onSubmitReview={onSubmitReview}
       onAddToWishlist={onAddToWishlist}
+      onSubmitReview={onSubmitReview}
+      isInWishlist={isInWishlist} // 👈 pass it down
     />
   );
 });
