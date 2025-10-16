@@ -1,4 +1,5 @@
-import '/src/App.css'
+import '/src/App.css';
+import '/src/styles/auth.css';
 import { useState } from "react";
 
 
@@ -22,7 +23,7 @@ const [mode, setMode] = useState("login"); // or 'register'
 
 if (props.currentUser) {
   return (
-    <div>
+    <div className="auth">
       Welcome, {props.currentUser.username}!{" "}
       <button onClick={props.onLogout}>
         Logout
@@ -36,7 +37,7 @@ if (props.currentUser) {
 
   return(
   
-<div style={{ maxWidth: "300px", margin: "20px auto" }}>
+<div className="auth">
       <h2>{mode === "login" ? "Login" : "Register"}</h2>
       <form onSubmit={submitACB}>
         {mode === "login" ? (
@@ -81,7 +82,7 @@ if (props.currentUser) {
         </button>
       </form>
 
-      <button onClick={() => setMode(mode === "login" ? "register" : "login")}>
+      <button className="auth__toggle" onClick={() => setMode(mode === "login" ? "register" : "login")}>
         Switch to {mode === "login" ? "Register" : "Login"}
       </button>
     </div>
