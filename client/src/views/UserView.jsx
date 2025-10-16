@@ -20,6 +20,12 @@ function User(props) {
     <div className='ProfileContainer'>
         <div className='ProfileHead'>
             <h1>{props.username}</h1>
+                    {/*Add Friend Button */}
+        {props.showAddFriend && (
+          <button onClick={props.onAddFriend} className='add-friend-btn'>
+            Add Friend
+          </button>
+        )}
         </div>
         
         <div className='Wishlist'>
