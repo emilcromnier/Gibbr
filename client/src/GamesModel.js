@@ -1,4 +1,5 @@
 import { searchGames, getTrendingGames, getGameById, getGameBySlug } from "./GameSource";
+import { makeAutoObservable } from "mobx";
 
 const GamesModel= {
   loading: false,
