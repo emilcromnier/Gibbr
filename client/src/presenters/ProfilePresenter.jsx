@@ -49,9 +49,7 @@ function ProfilePresenter(props){
     return <div>Loading wishlist...</div>;
     }
 
-    if (!wishlist.length) {
-    return <div>Nothing in wishlist</div>;
-    }
+    
 
 
     return <Profile username={user.username} description={user.description || "No description yet"} wishlist={wishlist} reviews={reviews} onRemoveFromWishlist={handleRemoveFromWishlist}/>;

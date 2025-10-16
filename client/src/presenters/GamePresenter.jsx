@@ -1,15 +1,24 @@
 import { observer } from "mobx-react-lite";
 import Game from "../views/GameView";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default observer(function GamePresenter(props) {
   const { id } = useParams();
   const userModel = props.model.user;
   const gamesModel = props.model.games;
 
+  const [isLoaded, setIsLoaded] = useState(false);
+
   useEffect(() => {
-    if (id) gamesModel.fetchGameById(id);
+    async function loadGame() {
+      console.log("🔄 useEffect triggered for id:", id);
+      if (!id) return;
+      setIsLoaded(false);
+      await gamesModel.fetchGameById(id); 
+      setIsLoaded(true);
+    }
+    loadGame();
   }, [id]);
 
   const game = gamesModel.selectedGame;
@@ -19,7 +28,7 @@ export default observer(function GamePresenter(props) {
     if (user) userModel.fetchReviews(gamesModel);
   }, [user]);
 
-  if (!game || game.id !== Number(id)) {
+  if (!isLoaded || !game) {
     return <div>Loading game details...</div>;
   }
 
