@@ -11,6 +11,10 @@ function Search(props) {
     window.location.hash = `#/game/${gameId}`;
   }
 
+    function InspectUserACB(username){
+    window.location.hash = `#/user/${username}`;
+  }
+
     if (!props.result) {
     return <div>No results found.</div>;
   }
@@ -20,8 +24,10 @@ function Search(props) {
       {props.result.user && (
         <div>
           <h1>User found:</h1>
+          <div className='search-user-container' onClick={() => InspectUserACB(props.result.user.username)}>
           <h3>Username: {props.result.user.username}</h3>
           <p>Games reviewed: {props.result.user.stats.gamesReviewed}</p>
+          </div>
         </div>
       )}
 
