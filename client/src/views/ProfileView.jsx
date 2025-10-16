@@ -17,6 +17,7 @@ function Profile(props) {
         <h1>{props.username}</h1>
       </div>
 
+      <div className="profile__main--content">
       <div className="profile__reviews">
         <h1 className="profile__section--title">Recent Reviews</h1>
         <ul className="profile__reviews--list">
@@ -27,7 +28,7 @@ function Profile(props) {
                 {game && <img src={game.image} alt={game.title} className="profile__review--image"/>}
                 <div className="profile__review--content">
                   <h3 className="profile__review--title">{game ? game.title : review.gameSlug}</h3>
-                  <div className="profile__review--rating">{review.rating}/5</div>
+                  <div className={`profile__review--rating rating--${review.rating}`}>{review.rating}</div>
                   <p className="profile__review--text">{review.reviewText}</p>
                 </div>
               </li>
@@ -50,13 +51,13 @@ function Profile(props) {
                 alt={game.title}
                 className="profile__wishlist--image"
               />
-              <p className="profile__wishlist--title">{game.title}</p>
+              <p className="profile__wishlist--gametitle">{game.title}</p>
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // prevent triggering InspectGameACB
                   props.onRemoveFromWishlist(game);
                 }}
-                className="removeButton"
+                className="profile__wishlist--remove"
               >
                 Remove from Wishlist
               </button>
@@ -65,6 +66,7 @@ function Profile(props) {
         </div>
       </div>
     </div>
+  </div>
   );
 }
 
