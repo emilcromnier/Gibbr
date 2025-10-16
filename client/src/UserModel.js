@@ -14,6 +14,8 @@ const UserModel = {
   loading: false,
   error: null,
   wishlist: [],
+  otherWishlist: [],
+  otherUser: null,
   reviews: [],
   friends: [],
   currentlyPlaying: [],
@@ -270,6 +272,26 @@ async addToWishlist(game, username, token) {
   }
 },
 
+async fetchUserByUsername(username) {
+  try {
+    const response = await axios.get(`${API_URL}/${username}`);
+    console.log("Found user:", response.data);
+    this.otherUser = response.data;
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // User not found, return null
+      return null;
+    } else {
+      // Other errors should be thrown
+      console.error("Error fetching user:", err);
+      throw err;
+    }
+  }
+},
+
+
+
 async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
 
@@ -279,9 +301,7 @@ async search(query, gamesModel) {
 
   // Try to find user by username
   try {
-    const userRes = await axios.get(`${API_URL}/${q}`);
-    console.log("Found user:", userRes.data);
-    foundUser = userRes.data;
+        foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
     if (err.response?.status !== 404) {
     }
@@ -309,15 +329,20 @@ async search(query, gamesModel) {
 
 
 async fetchWishlistDetails(gamesModel, user = this.currentUser) {
+    this.otherWishlist.splice(0, this.otherWishlist.length);
   if (!user?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
+  // Decide which wishlist to use
+  const targetList = user === this.currentUser ? this.wishlist : this.otherWishlist;
+
   for (const entry of user.backlog) {
     const slug = entry.gameSlug;
 
-    if (this.wishlist.some(g => g.slug === slug)) {
+    // Skip if already in target list
+    if (targetList.some(g => g.slug === slug)) {
       continue;
     }
 
@@ -325,12 +350,12 @@ async fetchWishlistDetails(gamesModel, user = this.currentUser) {
       const game = await this.fetchGameBySlug(slug, gamesModel);
       fetchedGames.push(game);
     } catch (err) {
-
+      console.error(`Failed to fetch game for slug ${slug}:`, err);
     }
   }
 
   // Bulk update once
-  this.wishlist.push(...fetchedGames);
+  targetList.push(...fetchedGames);
   this.loading = false;
 },
 
