@@ -14,11 +14,15 @@ const UserModel = {
   loading: false,
   error: null,
   wishlist: [],
+  otherWishlist: [],
+  otherUser: null,
   reviews: [],
   friends: [],
   currentlyPlaying: [],
   
 
+
+  //---------------------------------REVIEWS---------------------------------
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
     if (!this.token) throw new Error("Not authenticated");
@@ -47,6 +51,61 @@ const UserModel = {
       this.loading = false;
     }
   },
+
+
+  // Update existing review
+async updateReview(reviewId, updatedData) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.put(
+      `${REVIEW_URL}/${reviewId}`,
+      updatedData,
+      {
+        headers: { Authorization: `Bearer ${this.token}` },
+      }
+    );
+
+    const idx = this.reviews.findIndex(r => r.reviewId === reviewId);
+    if (idx !== -1) {
+      this.reviews[idx] = { ...this.reviews[idx], ...response.data };
+    }
+
+
+    return response.data;
+  } catch (err) {
+    console.error("Failed to update review:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+// Delete a review
+async deleteReview(reviewId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    await axios.delete(`${REVIEW_URL}/${reviewId}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+
+    this.reviews = this.reviews.filter(r => r.reviewId !== reviewId);
+  } catch (err) {
+    console.error("Failed to delete review:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
 
   // Fetch all reviews for the current user
   async fetchMyReviews(gamesModel) {
@@ -79,6 +138,7 @@ const UserModel = {
           ...review,
           gameDetails: game, // attach game details here
         });
+        console.log("Testing" + review._id + " " + slug);
       } catch (err) {
         console.warn(`Failed to load game details for slug ${slug}:`, err);
         enrichedReviews.push(review); // fallback to raw review
@@ -98,6 +158,8 @@ const UserModel = {
   }
 },
 
+
+// --------------------USERS & AUTH --------------------
   // Register a new user
   async register(username, email, password) {
     this.loading = true;
@@ -293,16 +355,33 @@ async removeFromWishlist(gameOrSlug) {
   }
 },
 
+async fetchUserByUsername(username) {
+  try {
+    const response = await axios.get(`${API_URL}/${username}`);
+    console.log("Found user:", response.data);
+    this.otherUser = response.data;
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // User not found, return null
+      return null;
+    } else {
+      // Other errors should be thrown
+      console.error("Error fetching user:", err);
+      throw err;
+    }
+  }
+},
+
+
+
 async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
 
   const q = query.trim();
 
   try {
-    //Try to find user by username
-    const userRes = await axios.get(`${API_URL}/${q}`);
-    console.log("Found user:", userRes.data);
-    return { type: "user", data: userRes.data };
+        foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
     // No user found, fall through to game search
     if (err.response?.status !== 404) {
@@ -322,16 +401,21 @@ async search(query, gamesModel) {
   }
 },
 
-async fetchWishlistDetails(gamesModel) {
-  if (!this.currentUser?.backlog?.length) return;
+async fetchWishlistDetails(gamesModel, user = this.currentUser) {
+    this.otherWishlist.splice(0, this.otherWishlist.length);
+  if (!user?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
-  for (const entry of this.currentUser.backlog) {
+  // Decide which wishlist to use
+  const targetList = user === this.currentUser ? this.wishlist : this.otherWishlist;
+
+  for (const entry of user.backlog) {
     const slug = entry.gameSlug;
 
-    if (this.wishlist.some(g => g.slug === slug)) {
+    // Skip if already in target list
+    if (targetList.some(g => g.slug === slug)) {
       continue;
     }
 
@@ -339,12 +423,12 @@ async fetchWishlistDetails(gamesModel) {
       const game = await this.fetchGameBySlug(slug, gamesModel);
       fetchedGames.push(game);
     } catch (err) {
-
+      console.error(`Failed to fetch game for slug ${slug}:`, err);
     }
   }
 
   // Bulk update once
-  this.wishlist.push(...fetchedGames);
+  targetList.push(...fetchedGames);
   this.loading = false;
 },
 

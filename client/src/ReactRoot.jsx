@@ -12,6 +12,7 @@ import ProfilePresenter from './presenters/ProfilePresenter.jsx';
 
 import GamePresenter from './presenters/GamePresenter.jsx';
 import SearchPresenter from './presenters/SearchPresenter.jsx';
+import UserPresenter from './presenters/UserPresenter.jsx';
 import {  createHashRouter,  RouterProvider, useParams} from "react-router-dom";
 import AuthPresenter from './presenters/AuthPresenter.jsx';
 
@@ -62,10 +63,15 @@ export default observer(
                 element: <div className="general"><NavbarPresenter model={model} /> <AuthPresenter model={model} /></div>
             },
             {
-  path: "/search/:query",
-  element: <div className="general"> <NavbarPresenter model={model} /> <SearchPresenter model={model} /> </div>
-  
-},
+                path: "/search/:query",
+                element: <div className="general"> <NavbarPresenter model={model} /> <SearchPresenter model={model} /> </div>
+                
+            },
+            {
+                path: "/user/:username",
+                element: <div className="general"> <NavbarPresenter model={model} /> <UserPresenter model={model} /> </div>
+                
+            },
 
 
             

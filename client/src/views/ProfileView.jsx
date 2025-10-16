@@ -17,23 +17,41 @@ function Profile(props) {
       </div>
 
       <div className="RecentReviews">
-        <h1>Recent Reviews</h1>
-        <ul>
-          {reviews.map((review) => {
-            const game = review.gameDetails;
-            return (
-              <li key={review._id}>
-                {game && <img src={game.image} alt={game.title} />}
-                <div>
-                  <h3>{game ? game.title : review.gameSlug}</h3>
-                  <div>{review.rating}/5</div>
-                  <p>{review.reviewText}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+  <h1>Recent Reviews</h1>
+  <ul>
+    {reviews.map((review) => {
+      const game = review.gameDetails;
+      return (
+        <li key={review._id} style={{ marginBottom: "16px" }}>
+          {game && <img src={game.image} alt={game.title} />}
+          <div>
+            <h3>{game ? game.title : review.gameSlug}</h3>
+            <div>Rating: {review.rating}/5</div>
+            <p>{review.reviewText}</p>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                  onClick={() => props.onUpdateReview(review.reviewId, review)}
+                >
+                  Update Review
+                </button>
+
+
+              <button
+                onClick={() => props.onRemoveReview(review.reviewId)}
+                style={{ backgroundColor: "red", color: "white" }}
+                >
+                Delete Review
+              </button>
+
+            </div>
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+</div>
+
 
       <div className="Wishlist">
         <div>
