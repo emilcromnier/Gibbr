@@ -27,5 +27,7 @@ createRoot(document.getElementById('root')).render(
 window.myModel= rootModel;  
 rootModel.user.restoreSession(); 
 rootModel.games.fetchTrendingGames();
+rootModel.games.fetchTopRatedGames();
+rootModel.games.fetchRecentGames();
 
 

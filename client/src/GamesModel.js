@@ -1,4 +1,4 @@
-import { searchGames, getTrendingGames, getGameById, getGameBySlug } from "./GameSource";
+import { searchGames, getTopRatedGames, getRecentGames, getTrendingGames, getGameById, getGameBySlug } from "./GameSource";
 
 const GamesModel= {
   loading: false,
@@ -6,6 +6,8 @@ const GamesModel= {
 
   trendingGames: [],
   fetchedGames: [],
+    topRatedGames: [],
+  recentGames: [],
 
   async fetchTrendingGames() {
       if (this.trendingGames.length > 0) {
@@ -23,6 +25,38 @@ const GamesModel= {
   }));
     this.fetchedGames.push(...this.trendingGames);
 
+  },
+
+  async fetchTopRatedGames() {
+    if (this.topRatedGames.length > 0) {
+      console.log("ALREADY FETCHED TOP RATED");
+      return;
+    }
+    console.log("FETCHING TOP RATED FROM API");
+    const data = await getTopRatedGames();
+    this.topRatedGames = data.results.map(game => ({
+      id: game.id || game.slug,
+      slug: game.slug,
+      title: game.name,
+      image: game.background_image || "https://via.placeholder.com/150",
+    }));
+    this.fetchedGames.push(...this.topRatedGames);
+  },
+
+  async fetchRecentGames() {
+    if (this.recentGames.length > 0) {
+      console.log("ALREADY FETCHED RECENT");
+      return;
+    }
+    console.log("FETCHING RECENT GAMES FROM API");
+    const data = await getRecentGames();
+    this.recentGames = data.results.map(game => ({
+      id: game.id || game.slug,
+      slug: game.slug,
+      title: game.name,
+      image: game.background_image || "https://via.placeholder.com/150",
+    }));
+    this.fetchedGames.push(...this.recentGames);
   },
 
   async fetchGameById(id) {
