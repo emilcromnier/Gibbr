@@ -14,9 +14,13 @@ const UserModel = {
   loading: false,
   error: null,
   wishlist: [],
+  otherWishlist: [],
+  otherUser: null,
   reviews: [],
   friends: [],
   currentlyPlaying: [],
+
+
   
   
     // Submit a new review
@@ -298,6 +302,26 @@ async removeFromWishlist(game, username, token) {
   }
 },
 
+async fetchUserByUsername(username) {
+  try {
+    const response = await axios.get(`${API_URL}/${username}`);
+    console.log("Found user:", response.data);
+    this.otherUser = response.data;
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // User not found, return null
+      return null;
+    } else {
+      // Other errors should be thrown
+      console.error("Error fetching user:", err);
+      throw err;
+    }
+  }
+},
+
+
+
 async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
 
@@ -307,9 +331,7 @@ async search(query, gamesModel) {
 
   // Try to find user by username
   try {
-    const userRes = await axios.get(`${API_URL}/${q}`);
-    console.log("Found user:", userRes.data);
-    foundUser = userRes.data;
+        foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
     if (err.response?.status !== 404) {
     }
@@ -337,15 +359,20 @@ async search(query, gamesModel) {
 
 
 async fetchWishlistDetails(gamesModel, user = this.currentUser) {
+    this.otherWishlist.splice(0, this.otherWishlist.length);
   if (!user?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
+  // Decide which wishlist to use
+  const targetList = user === this.currentUser ? this.wishlist : this.otherWishlist;
+
   for (const entry of user.backlog) {
     const slug = entry.gameSlug;
 
-    if (this.wishlist.some(g => g.slug === slug)) {
+    // Skip if already in target list
+    if (targetList.some(g => g.slug === slug)) {
       continue;
     }
 
@@ -353,12 +380,12 @@ async fetchWishlistDetails(gamesModel, user = this.currentUser) {
       const game = await this.fetchGameBySlug(slug, gamesModel);
       fetchedGames.push(game);
     } catch (err) {
-
+      console.error(`Failed to fetch game for slug ${slug}:`, err);
     }
   }
 
   // Bulk update once
-  this.wishlist.push(...fetchedGames);
+  targetList.push(...fetchedGames);
   this.loading = false;
 },
 
@@ -382,60 +409,62 @@ async fetchFriends(username) {
   }
 },
 
-async addFriend(username, friendId) {
-  if (!this.token) throw new Error("Not authenticated");
+    // Add a friend
+  async addFriend(friendId) {
+    if (!this.currentUser) {
+      console.error("You must be logged in to add a friend");
+      return;
+    }
 
-  this.loading = true;
-  this.error = null;
+    try {
+      const res = await axios.post(
+        `${API_URL}/${this.currentUser.username}/friends`,
+        { friendId },
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }
+      );
 
-  try {
-    const response = await axios.post(
-      `${API_URL}/${username}/friends`,
-      { friendId },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }
-    );
+      console.log("Friend added:", res.data);
+      alert("Friend Added");
+      // Update local friends list reactively
+      this.currentUser.friends.push(friendId);
+    } catch (err) {
+      console.error("Error adding friend:", err);
+      this.error = err.response?.data?.error || err.message;
+    }
+  },
 
-    console.log("Friend added:", response.data);
-    return response.data;
-  } catch (err) {
-    console.error("Failed to add friend:", err);
-    this.error = err.response?.data?.error || err.message;
-    throw err;
-  } finally {
-    this.loading = false;
-  }
-},
+  // Remove a friend
+  async removeFriend(friendId) {
+    if (!this.currentUser) {
+      console.error("You must be logged in to remove a friend");
+      return;
+    }
 
-async removeFriend(username, friendId) {
-  if (!this.token) throw new Error("Not authenticated");
+    try {
+      const res = await axios.delete(
+        `${API_URL}/${this.currentUser.username}/friends/${friendId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }
+      );
 
-  this.loading = true;
-  this.error = null;
-
-  try {
-    const response = await axios.delete(
-      `${API_URL}/${username}/friends/${friendId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }
-    );
-
-    console.log("Friend removed:", response.data);
-    return response.data;
-  } catch (err) {
-    console.error("Failed to remove friend:", err);
-    this.error = err.response?.data?.error || err.message;
-    throw err;
-  } finally {
-    this.loading = false;
-  }
-},
+      console.log("Friend removed:", res.data);
+      alert("FRIEND REMOVED");
+      // Update local friends list reactively
+      this.currentUser.friends = this.currentUser.friends.filter(
+        (f) => f !== friendId
+      );
+    } catch (err) {
+      console.error("Error removing friend:", err);
+      this.error = err.response?.data?.error || err.message;
+    }
+  },
 
 
 };

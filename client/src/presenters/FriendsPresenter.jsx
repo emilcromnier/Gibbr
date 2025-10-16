@@ -30,7 +30,7 @@ export default observer(function FriendsPresenter(props) {
   async function handleRemoveFriend(friendId) {
     if (!user?.username) return;
     try {
-      await userModel.removeFriend(user.username, friendId);
+      await userModel.removeFriend(friendId);
       userModel.friends = userModel.friends.filter(f => f._id !== friendId);
     } catch (err) {
       console.error("Failed to remove friend:", err);
@@ -40,6 +40,8 @@ export default observer(function FriendsPresenter(props) {
   // Optional: view friend profile
   function handleViewProfile(friend) {
     console.log("Viewing profile for:", friend.username);
+    window.location.hash = `#/user/${friend.username}`;
+
     // implement navigation if needed
   }
 
