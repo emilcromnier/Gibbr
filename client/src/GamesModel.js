@@ -9,6 +9,7 @@ const GamesModel= {
   fetchedGames: [],
     topRatedGames: [],
   recentGames: [],
+  selectedGame: null,
 
   async fetchTrendingGames() {
       if (this.trendingGames.length > 0) {
@@ -19,12 +20,13 @@ const GamesModel= {
     
     const data = await getTrendingGames();
     this.trendingGames = data.results.map(game => ({
-    id: game.id || game.slug, // use slug as fallback if id is missing
-    slug: game.slug,
-    title: game.name,
-    image: game.background_image || "https://via.placeholder.com/150",
+      id: game.id || game.slug,
+      slug: game.slug,
+      released: game.released,
+      title: game.name,
+      image: game.background_image,
   }));
-    this.fetchedGames.push(...this.trendingGames);
+    //this.fetchedGames.push(...this.trendingGames);
 
   },
 
@@ -38,10 +40,11 @@ const GamesModel= {
     this.topRatedGames = data.results.map(game => ({
       id: game.id || game.slug,
       slug: game.slug,
+      released: game.released,
       title: game.name,
-      image: game.background_image || "https://via.placeholder.com/150",
+      image: game.background_image,
     }));
-    this.fetchedGames.push(...this.topRatedGames);
+    //this.fetchedGames.push(...this.topRatedGames);
   },
 
   async fetchRecentGames() {
@@ -51,13 +54,15 @@ const GamesModel= {
     }
    
     const data = await getRecentGames();
+    console.log("DATA.RESULTS", data.results);
     this.recentGames = data.results.map(game => ({
       id: game.id || game.slug,
       slug: game.slug,
+      released: game.released,
       title: game.name,
-      image: game.background_image || "https://via.placeholder.com/150",
+      image: game.background_image,
     }));
-    this.fetchedGames.push(...this.recentGames);
+    //this.fetchedGames.push(...this.recentGames);
   },
 
   async fetchGameById(id) {
@@ -67,13 +72,13 @@ const GamesModel= {
     this.error = null;
 
     //Try to find the game locally first
-    const localGame = this.fetchedGames.find(
+    this.selectedGame = this.fetchedGames.find(
       game => Number(game.id) === Number(id)
     );
 
-    if (localGame) {
-  
-      this.selectedGame = localGame;
+    if (this.selectedGame) {
+        console.log("CACHED", this.selectedGame);
+      
       return; // Skip API call
     }
 
@@ -86,7 +91,7 @@ const GamesModel= {
       slug: data.slug,
       title: data.name,
       description: data.description_raw || data.description,
-      image: data.background_image || "https://via.placeholder.com/150",
+      image: data.background_image,
       released: data.released,
       rating: data.rating,
       platforms: data.platforms?.map(p => p.platform.name) || [],

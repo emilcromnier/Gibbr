@@ -11,6 +11,10 @@ function Search(props) {
     window.location.hash = `#/user/${username}`;
   }
 
+  if(props.loading){
+    return <div className="search__empty">Loading...</div>;
+  }
+
   if (!props.result) {
     return <div className="search__empty">No results found.</div>;
   }
