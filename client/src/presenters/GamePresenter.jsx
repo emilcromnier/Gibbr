@@ -35,24 +35,23 @@ export default observer(function GamePresenter({ model }) {
   const existingReview = userModel.getReviewForGame(game.slug);
 
   async function onAddToWishlist(game) {
-    if (!user) return alert("You must be logged in to add games to your wishlist.");
+    if (!user) return;
 
     try {
       await userModel.addToWishlist(game);
-      alert(`${game.title} added to wishlist!`);
+
     } catch (err) {
-      alert(`Failed to add to wishlist: ${err.message}`);
     }
   }
 
   async function onSubmitReview({ gameSlug, reviewText, rating }) {
-    if (!user) return alert("You must be logged in to submit a review.");
+    if (!user) return;
 
     try {
       await userModel.submitReview({ gameSlug, reviewText, rating });
-      alert("Review submitted successfully!");
+ 
     } catch (err) {
-      alert(`Failed to submit review: ${err.message}`);
+  
     }
   }
 

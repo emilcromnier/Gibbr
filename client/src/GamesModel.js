@@ -12,11 +12,11 @@ const GamesModel= {
 
   async fetchTrendingGames() {
       if (this.trendingGames.length > 0) {
-        console.log("ALREADY FETCHED GAMES")
+     
     // already cached, skip API call
     return;
   }
-    console.log("FETCHING TRENDING FROM API")
+    
     const data = await getTrendingGames();
     this.trendingGames = data.results.map(game => ({
     id: game.id || game.slug, // use slug as fallback if id is missing
@@ -30,10 +30,10 @@ const GamesModel= {
 
   async fetchTopRatedGames() {
     if (this.topRatedGames.length > 0) {
-      console.log("ALREADY FETCHED TOP RATED");
+     
       return;
     }
-    console.log("FETCHING TOP RATED FROM API");
+  
     const data = await getTopRatedGames();
     this.topRatedGames = data.results.map(game => ({
       id: game.id || game.slug,
@@ -46,10 +46,10 @@ const GamesModel= {
 
   async fetchRecentGames() {
     if (this.recentGames.length > 0) {
-      console.log("ALREADY FETCHED RECENT");
+     
       return;
     }
-    console.log("FETCHING RECENT GAMES FROM API");
+   
     const data = await getRecentGames();
     this.recentGames = data.results.map(game => ({
       id: game.id || game.slug,
@@ -72,13 +72,13 @@ const GamesModel= {
     );
 
     if (localGame) {
-      console.log("Using cached game:", localGame);
+  
       this.selectedGame = localGame;
       return; // Skip API call
     }
 
     //  If not found locally, fetch from API
-    console.log("Fetching from API");
+ 
     const data = await getGameById(id);
 
     this.selectedGame = {
@@ -97,7 +97,7 @@ const GamesModel= {
     this.fetchedGames.push(this.selectedGame);
 
   } catch (err) {
-    console.error("Error fetching game by ID:", err);
+
     this.error = err.message;
   } finally {
     this.loading = false;

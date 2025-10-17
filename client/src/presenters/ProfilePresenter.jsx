@@ -14,8 +14,7 @@ function ProfilePresenter(props){
     useEffect(() => {
     if (!user) return;
     props.model.user.fetchWishlistDetails(props.model.games);
-    props.model.user.fetchMyReviews(props.model.games)
-    .then(reviews => console.log("Fetched reviews:", reviews));
+    props.model.user.fetchMyReviews(props.model.games);
   }, [user]); // run only when `user` changes
 
   if (!user) {
@@ -33,9 +32,7 @@ function ProfilePresenter(props){
   const reviews = userModel.reviews || [];
 
   function handleRemoveFromWishlist(game) {
-  userModel.removeFromWishlist(game)
-    .then(() => alert(`${game.title} removed from wishlist!`))
-    .catch(err => alert(`Error removing from wishlist: ${err.message}`));
+  userModel.removeFromWishlist(game);
 }
 
 function handleUpdateReview(reviewId, review) {
@@ -44,18 +41,14 @@ function handleUpdateReview(reviewId, review) {
 
   if (newText && newRating) {
     userModel
-      .updateReview(reviewId, { reviewText: newText, rating: newRating })
-      .then(() => alert("Review updated!"))
-      .catch(err => alert(`Error updating review: ${err.message}`));
+      .updateReview(reviewId, { reviewText: newText, rating: newRating });
   }
 }
 
 function handleRemoveReview(reviewId) {
   if (window.confirm("Are you sure you want to delete this review?")) {
     userModel
-      .deleteReview(reviewId)
-      .then(() => alert("Review deleted!"))
-      .catch(err => alert(`Error deleting review: ${err.message}`));
+      .deleteReview(reviewId);
   }
 }
 

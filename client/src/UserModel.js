@@ -28,7 +28,7 @@ const UserModel = {
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
     if (!this.token) throw new Error("Not authenticated");
-    console.log(gameSlug, reviewText, rating )
+
 
     this.loading = true;
     this.error = null;
@@ -42,11 +42,11 @@ const UserModel = {
 
       // Optionally update local reviews state
       this.reviews.push(response.data);
-      console.log("Review submitted:", response.data);
+
 
       return response.data;
     } catch (err) {
-      console.error("Failed to submit review:", err);
+
       this.error = err.response?.data?.error || err.message;
       throw err;
     } finally {
@@ -79,7 +79,7 @@ async updateReview(reviewId, updatedData) {
 
     return response.data;
   } catch (err) {
-    console.error("Failed to update review:", err);
+
     this.error = err.response?.data?.error || err.message;
     throw err;
   } finally {
@@ -101,7 +101,7 @@ async deleteReview(reviewId) {
 
     this.reviews = this.reviews.filter(r => r.reviewId !== reviewId);
   } catch (err) {
-    console.error("Failed to delete review:", err);
+
     this.error = err.response?.data?.error || err.message;
     throw err;
   } finally {
@@ -140,19 +140,19 @@ async deleteReview(reviewId) {
           ...review,
           gameDetails: game, // attach game details here
         });
-        console.log("Testing" + review._id + " " + slug);
+   
       } catch (err) {
-        console.warn(`Failed to load game details for slug ${slug}:`, err);
+
         enrichedReviews.push(review); // fallback to raw review
       }
     }
 
     this.reviews = enrichedReviews;
-    console.log("Fetched and enriched my reviews:", this.reviews);
+
 
     return this.reviews;
   } catch (err) {
-    console.error("Failed to fetch reviews:", err);
+
     this.error = err.response?.data?.error || err.message;
     throw err;
   } finally {
@@ -176,10 +176,10 @@ getReviewForGame(slug) {
         email,
         password,
       });
-      console.log(" Registered:", response.data);
+
       return response.data;
     } catch (err) {
-      console.error(" Registration error:", err);
+
       this.error = err.response?.data?.error || err.message;
       throw err;
     } finally {
@@ -290,7 +290,7 @@ async removeFromWishlist(gameOrSlug) {
     this.wishlist = this.wishlist.filter(g => g.slug !== gameSlug);
   } catch (err) {
     this.error = err.response?.data?.error || err.message;
-    console.error("Error removing from wishlist:", err);
+
     throw err;
   }
 },
@@ -305,14 +305,14 @@ async removeFromWishlist(gameOrSlug) {
     if (gamesModel && !fullResults) {
       const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
-        console.log(`Using cached game for slug: ${slug}`);
+  
         this.selectedGame = cachedGame;
         return cachedGame;
       }
     }
 
     // Fetch from API using your searchGames util
-    console.log("Fetching by slug through API");
+
     const searchData = await searchGames(slug);
 
     if (!searchData?.results?.length) {
@@ -363,7 +363,7 @@ async removeFromWishlist(gameOrSlug) {
 async fetchUserByUsername(username) {
   try {
     const response = await axios.get(`${API_URL}/${username}`);
-    console.log("Found user:", response.data);
+   
     this.otherUser = response.data;
     return response.data;
   } catch (err) {
@@ -372,7 +372,7 @@ async fetchUserByUsername(username) {
       return null;
     } else {
       // Other errors should be thrown
-      console.error("Error fetching user:", err);
+      
       throw err;
     }
   }
@@ -397,7 +397,7 @@ async search(query, gamesModel) {
     foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
     if (err.response?.status !== 404) {
-      console.error("Error searching for user:", err);
+
       throw err;
     }
   }
@@ -405,7 +405,7 @@ async search(query, gamesModel) {
   try {
     games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
   } catch (err) {
-    console.error("Game search failed:", err);
+
   }
 
   if (foundUser || (games && games.length > 0)) {
@@ -440,7 +440,7 @@ async fetchWishlistDetails(gamesModel, user = this.currentUser) {
       const game = await this.fetchGameBySlug(slug, gamesModel);
       fetchedGames.push(game);
     } catch (err) {
-      console.error(`Failed to fetch game for slug ${slug}:`, err);
+  
     }
   }
 
@@ -466,7 +466,7 @@ async fetchFriends(username) {
     const response = await axios.get(`${API_URL}/${username}/friends`);
     return response.data; // Array of { _id, username }
   } catch (err) {
-    console.error("Failed to fetch friends:", err);
+
     this.error = err.response?.data?.error || err.message;
     throw err;
   } finally {
@@ -477,7 +477,7 @@ async fetchFriends(username) {
     // Add a friend
   async addFriend(friendId) {
     if (!this.currentUser) {
-      console.error("You must be logged in to add a friend");
+
       return;
     }
 
@@ -492,12 +492,12 @@ async fetchFriends(username) {
         }
       );
 
-      console.log("Friend added:", res.data);
-      alert("Friend Added");
+
+
       // Update local friends list reactively
       this.currentUser.friends.push(friendId);
     } catch (err) {
-      console.error("Error adding friend:", err);
+
       this.error = err.response?.data?.error || err.message;
     }
   },
@@ -505,7 +505,7 @@ async fetchFriends(username) {
   // Remove a friend
   async removeFriend(friendId) {
     if (!this.currentUser) {
-      console.error("You must be logged in to remove a friend");
+
       return;
     }
 
@@ -519,14 +519,13 @@ async fetchFriends(username) {
         }
       );
 
-      console.log("Friend removed:", res.data);
-      alert("FRIEND REMOVED");
+
       // Update local friends list reactively
       this.currentUser.friends = this.currentUser.friends.filter(
         (f) => f !== friendId
       );
     } catch (err) {
-      console.error("Error removing friend:", err);
+  
       this.error = err.response?.data?.error || err.message;
     }
   },

@@ -8,7 +8,7 @@ function GameGrid(props) {
   const trendingGames = props.trendingGames;
   const topRatedGames = props.topRatedGames;
   const recentlyReleasedGames = props.recentlyReleasedGames;
-  console.log("Games to render:", trendingGames);
+
 
   function InspectGameACB(gameId){
     window.location.hash = `#/game/${gameId}`;
