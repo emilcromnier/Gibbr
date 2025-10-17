@@ -68,12 +68,13 @@ function User(props) {
           <div className='profile__wishlist--carousel'>
             {wishlist.map((game) => (
               <div key={game.id} className='profile__wishlist--item' onClick={() => InspectGameACB(game.id)}>
-              <p>{game.title}</p>
+
               <img
                 src={game.image}
                 alt={game.title}
                 className='profile__wishlist--image'
               />
+              <p className='profile__wishlist--gametitle'>{game.title}</p>
             </div>
           ))}
         </div>
