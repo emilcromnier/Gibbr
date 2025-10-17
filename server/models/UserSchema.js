@@ -62,31 +62,7 @@ UserSchema.virtual("reviews", {
   foreignField: "userId"
 });
 
- // Removes game from from currentlyPlaying upon completion
-UserSchema.methods.markGameCompleted = async function (gameSlug) {
-  // Remove from currentlyPlaying
-  this.currentlyPlaying = this.currentlyPlaying.filter(entry => entry.gameSlug !== gameSlug);
-
-  // Increment stats
-  this.stats.gamesReviewed += 1;
-  this.stats.gamesCompleted += 1;
-
-  await this.save();
-};
-
 
 
 module.exports = mongoose.model('User', UserSchema);  //node.js export. Apparently node pluralizes the model name to create the collection name
-
-/*await User.findByIdAndUpdate(
-  userId,
-  { $addToSet: { favorites: "battlefield-1" } }  // $addToSet prevents duplicates
-);
-
-await User.findByIdAndUpdate(
-  userId,
-  { $pull: { favorites: "battlefield-1" } }
-);
-
-*/
 

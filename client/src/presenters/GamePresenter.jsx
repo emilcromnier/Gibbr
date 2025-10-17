@@ -3,19 +3,17 @@ import Game from "../views/GameView";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-export default observer(function GamePresenter(props) {
+export default observer(function GamePresenter({ model }) {
   const { id } = useParams();
-  const userModel = props.model.user;
-  const gamesModel = props.model.games;
-
+  const userModel = model.user;
+  const gamesModel = model.games;
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadGame() {
-      console.log("🔄 useEffect triggered for id:", id);
       if (!id) return;
       setIsLoaded(false);
-      await gamesModel.fetchGameById(id); 
+      await gamesModel.fetchGameById(id);
       setIsLoaded(true);
     }
     loadGame();
@@ -25,42 +23,30 @@ export default observer(function GamePresenter(props) {
   const user = userModel.currentUser;
 
   useEffect(() => {
-    if (user) userModel.fetchReviews(gamesModel);
+    if (user) userModel.fetchMyReviews(gamesModel);
   }, [user]);
 
   if (!isLoaded || !game) {
     return <div>Loading game details...</div>;
   }
 
-  // --- FIND EXISTING REVIEW ---
-  const existingReview = userModel.reviews.find(
-    (r) =>
-      r.gameSlug?.toLowerCase().replace(/[^a-z0-9]/g, "") ===
-      game.slug?.toLowerCase().replace(/[^a-z0-9]/g, "")
-  );
+  // Use model helpers for clarity
+  const isInWishlist = userModel.isInWishlist(game.slug);
+  const existingReview = userModel.getReviewForGame(game.slug);
 
-  console.log("Game slug:", game.slug);
-  console.log("Existing review found:", existingReview);
+  async function onAddToWishlist(game) {
+    if (!user) return alert("You must be logged in to add games to your wishlist.");
 
-  function onAddToWishlist(game) {
-    if (!user) {
-      alert("You must be logged in to add games to your wishlist.");
-      return;
+    try {
+      await userModel.addToWishlist(game);
+      alert(`${game.title} added to wishlist!`);
+    } catch (err) {
+      alert(`Failed to add to wishlist: ${err.message}`);
     }
-
-    const username = userModel.currentUser?.username;
-    const token = userModel.token;
-    userModel
-      .addToWishlist(game, username, token)
-      .then(() => alert(`${game.title} added to wishlist!`))
-      .catch((err) => alert(`Failed to add to wishlist: ${err.message}`));
   }
 
   async function onSubmitReview({ gameSlug, reviewText, rating }) {
-    if (!user) {
-      alert("You must be logged in to submit a review.");
-      return;
-    }
+    if (!user) return alert("You must be logged in to submit a review.");
 
     try {
       await userModel.submitReview({ gameSlug, reviewText, rating });
@@ -74,6 +60,7 @@ export default observer(function GamePresenter(props) {
     <Game
       game={game}
       existingReview={existingReview}
+      isInWishlist={isInWishlist}
       onSubmitReview={onSubmitReview}
       onAddToWishlist={onAddToWishlist}
     />

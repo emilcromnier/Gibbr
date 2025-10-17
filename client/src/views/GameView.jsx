@@ -15,14 +15,9 @@ const Game = observer((props) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const toggleDescription = () => { setShowFullDescription(!showFullDescription); };
 
-  function handleAddToWishlist() {
-    props.onAddToWishlist(game);
-  }
-
   async function handleSubmitReview(e) {
     e.preventDefault();
     setSubmitting(true);
-
     try {
       await props.onSubmitReview({
         gameSlug: game.slug,
@@ -34,9 +29,6 @@ const Game = observer((props) => {
 
       setReviewText('');
       setRating(5);
-    } catch (err) {
-      console.error('Failed to submit review:', err);
-      alert('Error submitting review');
     } finally {
       setSubmitting(false);
     }
