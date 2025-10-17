@@ -160,6 +160,9 @@ async deleteReview(reviewId) {
   }
 },
 
+getReviewForGame(slug) {
+  return this.reviews.find(r => r.gameSlug === slug) || null;
+},
 
 // --------------------USERS & AUTH --------------------
   // Register a new user
@@ -433,6 +436,11 @@ async fetchWishlistDetails(gamesModel, user = this.currentUser) {
   targetList.push(...fetchedGames);
   this.loading = false;
 },
+
+isInWishlist(slug) {
+  return this.wishlist.some(game => game.slug === slug);
+},
+
 
 // ==================== FRIENDS ====================
 

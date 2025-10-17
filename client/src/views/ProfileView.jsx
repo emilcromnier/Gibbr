@@ -17,61 +17,66 @@ function Profile(props) {
         <h1>{props.username}</h1>
       </div>
 
-      <div className="RecentReviews">
-  <h1>Recent Reviews</h1>
-  <ul>
-    {reviews.map((review) => {
-      const game = review.gameDetails;
-      return (
-        <li key={review._id} style={{ marginBottom: "16px" }}>
-          {game && <img src={game.image} alt={game.title} />}
-          <div>
-            <h3>{game ? game.title : review.gameSlug}</h3>
-            <div>Rating: {review.rating}/5</div>
-            <p>{review.reviewText}</p>
+<div className="profile__main--content">
+  <div className="profile__reviews">
+    <h1 className="profile__section--title">Recent Reviews</h1>
+    <ul className="profile__reviews--list">
+      {reviews.map((review) => {
+        const game = review.gameDetails;
+        return (
+          <li key={review.reviewId || review._id} className="profile__review--item">
+            {game && (
+              <img
+                src={game.image}
+                alt={game.title}
+                className="profile__review--image"
+              />
+            )}
+            <div className="profile__review--content">
+              <h3 className="profile__review--title">
+                {game ? game.title : review.gameSlug}
+              </h3>
+              <div
+                className={`profile__review--rating rating--${review.rating}`}
+              >
+                {review.rating}
+              </div>
+              <p className="profile__review--text">{review.reviewText}</p>
 
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button
+              {/* Action Buttons */}
+              <div
+                className="profile__review--actions"
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "8px",
+                }}
+              >
+                <button
                   onClick={() => props.onUpdateReview(review.reviewId, review)}
+                  className="profile__review--button update"
                 >
                   Update Review
                 </button>
 
-
-              <button
-                onClick={() => props.onRemoveReview(review.reviewId)}
-                style={{ backgroundColor: "red", color: "white" }}
+                <button
+                  onClick={() => props.onRemoveReview(review.reviewId)}
+                  className="profile__review--button delete"
+                  style={{
+                    backgroundColor: "red",
+                    color: "white",
+                  }}
                 >
-                Delete Review
-              </button>
-
+                  Delete Review
+                </button>
+              </div>
             </div>
-          </div>
-        </li>
-      );
-    })}
-  </ul>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
 </div>
-
-      <div className="profile__main--content">
-      <div className="profile__reviews">
-        <h1 className="profile__section--title">Recent Reviews</h1>
-        <ul className="profile__reviews--list">
-          {reviews.map((review) => {
-            const game = review.gameDetails;
-            return (
-              <li key={review._id} className="profile__review--item">
-                {game && <img src={game.image} alt={game.title} className="profile__review--image"/>}
-                <div className="profile__review--content">
-                  <h3 className="profile__review--title">{game ? game.title : review.gameSlug}</h3>
-                  <div className={`profile__review--rating rating--${review.rating}`}>{review.rating}</div>
-                  <p className="profile__review--text">{review.reviewText}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
 
       <div className="profile__wishlist">
         <h1 className="profile__wishlist--title">Wishlist</h1>
@@ -102,7 +107,6 @@ function Profile(props) {
         </div>
       </div>
     </div>
-  </div>
   );
 }
 

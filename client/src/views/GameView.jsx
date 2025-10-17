@@ -2,32 +2,18 @@ import "/src/App.css";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
-const Game = observer((props) => {
-  const { game, onAddToWishlist, onSubmitReview, isInWishlist } = props;
+const Game = observer(({ game, existingReview, isInWishlist, onAddToWishlist, onSubmitReview }) => {
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(5);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleAddToWishlist() {
-    onAddToWishlist(game);
-  }
-
   async function handleSubmitReview(e) {
     e.preventDefault();
     setSubmitting(true);
-
     try {
-      await onSubmitReview({
-        gameSlug: game.slug,
-        reviewText,
-        rating,
-        completed: false,
-        liked: false,
-      });
+      await onSubmitReview({ gameSlug: game.slug, reviewText, rating });
       setReviewText("");
       setRating(5);
-    } catch (err) {
-      alert("Error submitting review");
     } finally {
       setSubmitting(false);
     }
@@ -44,43 +30,52 @@ const Game = observer((props) => {
       <p><strong>Released:</strong> {game.released}</p>
       <p>{game.description}</p>
 
-      {/* 👇 Only show if NOT in wishlist */}
-      {!isInWishlist && (
-        <button onClick={handleAddToWishlist}>Add to Wishlist</button>
+      {/* Wishlist */}
+      {!isInWishlist ? (
+        <button onClick={() => onAddToWishlist(game)}>Add to Wishlist</button>
+      ) : (
+        <p style={{ color: "gray" }}>✅ Already in Wishlist</p>
       )}
 
-      <h2>Submit a Review</h2>
-      <form onSubmit={handleSubmitReview}>
-        <div>
-          <label>Rating:</label>
-          {[1, 2, 3, 4, 5].map((num) => (
-            <label key={num} style={{ margin: "0 5px" }}>
-              <input
-                type="radio"
-                name="rating"
-                value={num}
-                checked={rating === num}
-                onChange={() => setRating(num)}
-              />
-              {num}
-            </label>
-          ))}
+      {/* Review */}
+      {existingReview ? (
+        <div className="existing-review">
+          <h3>Your Review</h3>
+          <div><strong>Rating:</strong> {existingReview.rating}/5</div>
+          {existingReview.reviewText && <p>{existingReview.reviewText}</p>}
         </div>
+      ) : (
+        <form onSubmit={handleSubmitReview} style={{ marginTop: "20px" }}>
+          <h2>Submit a Review</h2>
+          <div>
+            <label>Rating:</label>
+            {[1, 2, 3, 4, 5].map(num => (
+              <label key={num} style={{ margin: "0 5px" }}>
+                <input
+                  type="radio"
+                  name="rating"
+                  value={num}
+                  checked={rating === num}
+                  onChange={() => setRating(num)}
+                />
+                {num}
+              </label>
+            ))}
+          </div>
 
-        <div style={{ marginTop: "10px" }}>
           <textarea
             value={reviewText}
-            onChange={(e) => setReviewText(e.target.value)}
-            placeholder="Write your review here..."
+            onChange={e => setReviewText(e.target.value)}
+            placeholder="Write your review..."
             rows={4}
-            style={{ width: "100%", padding: "5px" }}
+            style={{ width: "100%", padding: "5px", marginTop: "10px" }}
           />
-        </div>
 
-        <button type="submit" disabled={submitting} style={{ marginTop: "10px" }}>
-          {submitting ? "Submitting..." : "Submit Review"}
-        </button>
-      </form>
+          <button type="submit" disabled={submitting} style={{ marginTop: "10px" }}>
+            {submitting ? "Submitting..." : "Submit Review"}
+          </button>
+        </form>
+      )}
     </div>
   );
 });
