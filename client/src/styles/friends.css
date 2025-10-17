@@ -1,0 +1,86 @@
+.friends {
+    max-width: 600px;
+    margin: 4rem auto;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    color: #fff;
+}
+
+.friends__title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+.friends__status {
+    text-align: center;
+    font-size: 1rem;
+    margin-top: 2rem;
+}
+
+.friends__status--loading {
+    color: #bbb;
+}
+
+.friends__status--error {
+    color: #ff6666;
+}
+
+.friends__status--empty {
+    color: #888;
+    font-style: italic;
+}
+
+.friends__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.friends__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.friends__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.friends__name {
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #f5f5f5;
+    transition: color 0.2s ease;
+}
+
+.friends__name:hover {
+    color: #ff66c4;
+    text-decoration: underline;
+}
+
+.friends__remove {
+    background: rgba(248, 120, 120, 0.9);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.friends__remove:hover {
+    background: rgba(255, 0, 0, 0.7);
+    transform: scale(1.05);
+}

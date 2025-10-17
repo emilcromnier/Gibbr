@@ -10,7 +10,7 @@ export async function getGameById(id) {
     const response = await axios.get(`${BACKEND_URL}/games/id/${id}`);
     return response.data;
   } catch (err) {
-    console.error("Error fetching game by ID:", err);
+
     throw err;
   }
 }
@@ -25,10 +25,10 @@ export async function searchGames(query) {
     const response = await axios.get(`${BACKEND_URL}/games/search`, {
       params: { query } // Axios automatically encodes this as a query string
     });
-    console.log(response); // full Axios response, mostly for debugging
+    
     return response.data;  // the actual search results returned from your backend
   } catch (err) {
-    console.error("Error searching games:", err);
+
     throw err; // propagate error to caller
   }
 }
@@ -39,7 +39,27 @@ export async function getTrendingGames() {
     const response = await axios.get(`${BACKEND_URL}/games/trending`);
     return response.data; 
   } catch (err) {
-    console.error("Error fetching trending games:", err);
+
+    throw err;
+  }
+}
+
+export async function getTopRatedGames() {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/games/top-rated`);
+    return response.data;
+  } catch (err) {
+
+    throw err;
+  }
+}
+
+export async function getRecentGames() {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/games/recent`);
+    return response.data;
+  } catch (err) {
+  
     throw err;
   }
 }

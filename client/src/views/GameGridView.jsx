@@ -3,8 +3,10 @@ import "/src/styles/GameGrid.css";
 import { useState, useEffect } from "react";
 
 function GameGrid(props) {
-  const games = props.games;
   const [maxGames, setMaxGames] = useState(window.innerWidth <= 950 ? 3 : 6);
+  const trendingGames = props.trendingGames;
+  const topRatedGames = props.topRatedGames;
+  const recentlyReleasedGames = props.recentlyReleasedGames;
 
   useEffect(() => {
     function handleResize() {
@@ -22,7 +24,7 @@ function GameGrid(props) {
   return (
     <div>
       <div className="hero">
-        {games.slice(0, 1).map((game) => (
+        {trendingGames.slice(0, 1).map((game) => (
           <div
             className="recommended-game"
             onClick={() => InspectGameACB(game.id)}
@@ -36,24 +38,59 @@ function GameGrid(props) {
           </div>
         ))}
         <div className="shortcuts">
-          {games.slice(0, 4).map((game) => (
+          {topRatedGames.slice(0, 4).map((game) => (
+            <div
+              className="shortcuts__container"
+              onClick={() => InspectGameACB(game.id)}
+            >
+              <img
+                className="shortcuts__container-img"
+                key={game.id}
+                src={game.image}
+                alt={game.title}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <h2>Trending</h2>
+      <div className="carousel">
+        {trendingGames.slice(0, maxGames).map((game) => (
           <div
-            className="shortcuts__container"
+            className="carousel__game"
             onClick={() => InspectGameACB(game.id)}
           >
             <img
-              className="shortcuts__container-img"
+              className="carousel__game-img"
               key={game.id}
               src={game.image}
               alt={game.title}
             />
           </div>
         ))}
-        </div>
       </div>
 
+      <h2>Top rated</h2>
       <div className="carousel">
-        {games.slice(1, 1 + maxGames).map((game) => (
+        {topRatedGames.slice(0, maxGames).map((game) => (
+          <div
+            className="carousel__game"
+            onClick={() => InspectGameACB(game.id)}
+          >
+            <img
+              className="carousel__game-img"
+              key={game.id}
+              src={game.image}
+              alt={game.title}
+            />
+          </div>
+        ))}
+      </div>
+
+      <h2>Recently released</h2>
+      <div className="carousel">
+        {recentlyReleasedGames.slice(0, maxGames).map((game) => (
           <div
             className="carousel__game"
             onClick={() => InspectGameACB(game.id)}

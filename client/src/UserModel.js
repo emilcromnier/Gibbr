@@ -3,6 +3,7 @@ import axios from "axios";
 import { toJS } from "mobx";
 import { searchGames } from "./GameSource";
 import GamesModel from "./GamesModel";
+import { makeAutoObservable } from "mobx";
 
 const BACKEND_URL = "http://localhost:9000/api/auth";
 const API_URL = "http://localhost:9000/api/users";
@@ -14,12 +15,21 @@ const UserModel = {
   loading: false,
   error: null,
   wishlist: [],
+  otherWishlist: [],
+  otherUser: null,
   reviews: [],
+  friends: [],
+  currentlyPlaying: [],
 
+
+  
+
+
+  //---------------------------------REVIEWS---------------------------------
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
     if (!this.token) throw new Error("Not authenticated");
-    console.log(gameSlug, reviewText, rating )
+
 
     this.loading = true;
     this.error = null;
@@ -33,17 +43,72 @@ const UserModel = {
 
       // Optionally update local reviews state
       this.reviews.push(response.data);
-      console.log("Review submitted:", response.data);
+
 
       return response.data;
     } catch (err) {
-      console.error("Failed to submit review:", err);
+
       this.error = err.response?.data?.error || err.message;
       throw err;
     } finally {
       this.loading = false;
     }
   },
+
+
+  // Update existing review
+async updateReview(reviewId, updatedData) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.put(
+      `${REVIEW_URL}/${reviewId}`,
+      updatedData,
+      {
+        headers: { Authorization: `Bearer ${this.token}` },
+      }
+    );
+
+    const idx = this.reviews.findIndex(r => r.reviewId === reviewId);
+    if (idx !== -1) {
+      this.reviews[idx] = { ...this.reviews[idx], ...response.data };
+    }
+
+
+    return response.data;
+  } catch (err) {
+
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+// Delete a review
+async deleteReview(reviewId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    await axios.delete(`${REVIEW_URL}/${reviewId}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+
+    this.reviews = this.reviews.filter(r => r.reviewId !== reviewId);
+  } catch (err) {
+
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
 
   // Fetch all reviews for the current user
   async fetchMyReviews(gamesModel) {
@@ -63,7 +128,7 @@ const UserModel = {
 
     const reviews = response.data;
 
-    // 🧠 Enrich each review with the game's details
+    // Enrich each review with the game's details
     const enrichedReviews = [];
     for (const review of reviews) {
       const slug = review.gameSlug;
@@ -76,18 +141,19 @@ const UserModel = {
           ...review,
           gameDetails: game, // attach game details here
         });
+   
       } catch (err) {
-        console.warn(`Failed to load game details for slug ${slug}:`, err);
+
         enrichedReviews.push(review); // fallback to raw review
       }
     }
 
     this.reviews = enrichedReviews;
-    console.log("Fetched and enriched my reviews:", this.reviews);
+
 
     return this.reviews;
   } catch (err) {
-    console.error("Failed to fetch reviews:", err);
+
     this.error = err.response?.data?.error || err.message;
     throw err;
   } finally {
@@ -95,6 +161,11 @@ const UserModel = {
   }
 },
 
+getReviewForGame(slug) {
+  return this.reviews.find(r => r.gameSlug === slug) || null;
+},
+
+// --------------------USERS & AUTH --------------------
   // Register a new user
   async register(username, email, password) {
     this.loading = true;
@@ -106,10 +177,10 @@ const UserModel = {
         email,
         password,
       });
-      console.log(" Registered:", response.data);
+
       return response.data;
     } catch (err) {
-      console.error(" Registration error:", err);
+
       this.error = err.response?.data?.error || err.message;
       throw err;
     } finally {
@@ -174,54 +245,82 @@ async restoreSession() {
     });
 
     this.currentUser = response.data;
+
+    // populate friends observable
+    this.friends = await this.fetchFriends(this.currentUser.username);
+
+
   } catch (err) {
     this.logout(); // token may have expired
   }
 },
 
-async addToWishlist(game, username, token) {
-    try {
-      const response = await axios.post(
-        `${API_URL}/${username}/backlog`,
-        { gameSlug: game.slug },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+async addToWishlist(game) {
+  if (!this.currentUser) throw new Error("Not authenticated");
 
-      this.wishlist.push(game); // update MobX state (optional)
-    } catch (err) {
-      this.error = err.response?.data?.error || err.message;
-      throw err;
-    }
-  },
+  const username = this.currentUser.username;
+
+  try {
+    await axios.post(
+      `${API_URL}/${username}/backlog`,
+      { gameSlug: game.slug },
+      { headers: { Authorization: `Bearer ${this.token}` } }
+    );
+
+    this.wishlist.push(game); // update MobX state
+  } catch (err) {
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  }
+},
+
+
+async removeFromWishlist(gameOrSlug) {
+  if (!this.currentUser) throw new Error("Not authenticated");
+
+  const username = this.currentUser.username;
+  // Accept either a game object or slug string
+  const gameSlug = typeof gameOrSlug === "string" ? gameOrSlug : gameOrSlug.slug;
+
+  try {
+    await axios.delete(`${API_URL}/${username}/backlog/${gameSlug}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+
+    // Remove from local MobX state
+    this.wishlist = this.wishlist.filter(g => g.slug !== gameSlug);
+  } catch (err) {
+    this.error = err.response?.data?.error || err.message;
+
+    throw err;
+  }
+},
+
 
  async fetchGameBySlug(slug, gamesModel, { fullResults = false } = {}) {
   try {
     this.loading = true;
     this.error = null;
 
-    // ✅ First: Check cache
+    // First check cache
     if (gamesModel && !fullResults) {
       const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
-        console.log(`Using cached game for slug: ${slug}`);
+  
         this.selectedGame = cachedGame;
         return cachedGame;
       }
     }
 
-    // 🛰️ Fetch from API using your searchGames util
-    console.log("Fetching by slug through API");
+    // Fetch from API using your searchGames util
+
     const searchData = await searchGames(slug);
 
     if (!searchData?.results?.length) {
       throw new Error(`No game found for slug: ${slug}`);
     }
 
-    // 🟡 If fullResults requested, just return the raw array
+    // If fullResults requested, just return the raw array
     if (fullResults) {
       return searchData.results.map(gameData => ({
         id: gameData.id,
@@ -236,7 +335,7 @@ async addToWishlist(game, username, token) {
       }));
     }
 
-    // 🟢 Otherwise, return the single match (exact slug or first)
+    // Otherwise, return the single match (exact slug or first)
     const gameData = searchData.results.find(g => g.slug === slug) || searchData.results[0];
 
     const singleGame = {
@@ -262,45 +361,79 @@ async addToWishlist(game, username, token) {
   }
 },
 
+async fetchUserByUsername(username) {
+  try {
+    const response = await axios.get(`${API_URL}/${username}`);
+   
+    this.otherUser = response.data;
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // User not found, return null
+      return null;
+    } else {
+      // Other errors should be thrown
+      
+      throw err;
+    }
+  }
+},
+
+
+
 async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
 
   const q = query.trim();
 
+
+  //We use let here because foundUser and foundGames are initially declared and later conditionally 
+  //assigned based on asynchronous fetch results. This way is clearer than creating extra functions just 
+  // to keep using const. In other parts of the code we use const consistently for single-assignment variables.
+  let foundUser = null;
+  let games = [];
+
+
   try {
-    //Try to find user by username
-    const userRes = await axios.get(`${API_URL}/${q}`);
-    console.log("Found user:", userRes.data);
-    return { type: "user", data: userRes.data };
+    foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
-    // No user found, fall through to game search
     if (err.response?.status !== 404) {
-      console.error("Error searching for user:", err);
+
       throw err;
     }
   }
 
   try {
-    // 2️⃣ Try to find game by slug using caching
-    const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
-    console.log("Found games:", games);
-    return { type: "game", data: games };
+    games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
   } catch (err) {
-    console.error("No user or game found:", err);
-    return null;
+
   }
+
+  if (foundUser || (games && games.length > 0)) {
+    return {
+      user: foundUser,
+      games: games || [],
+    };
+  }
+
+  return null;
 },
 
-async fetchWishlistDetails(gamesModel) {
-  if (!this.currentUser?.backlog?.length) return;
+async fetchWishlistDetails(gamesModel, user = this.currentUser) {
+    this.otherWishlist.splice(0, this.otherWishlist.length);
+  if (!user?.backlog?.length) return;
   this.loading = true;
 
   const fetchedGames = [];
 
-  for (const entry of this.currentUser.backlog) {
+  // Decide which wishlist to use
+  const targetList = user === this.currentUser ? this.wishlist : this.otherWishlist;
+
+  for (const entry of user.backlog) {
     const slug = entry.gameSlug;
 
-    if (this.wishlist.some(g => g.slug === slug)) {
+    // Skip if already in target list
+    if (targetList.some(g => g.slug === slug)) {
       continue;
     }
 
@@ -308,16 +441,99 @@ async fetchWishlistDetails(gamesModel) {
       const game = await this.fetchGameBySlug(slug, gamesModel);
       fetchedGames.push(game);
     } catch (err) {
-
+  
     }
   }
 
   // Bulk update once
-  this.wishlist.push(...fetchedGames);
+  targetList.push(...fetchedGames);
   this.loading = false;
-}
+},
+
+isInWishlist(slug) {
+  return this.wishlist.some(game => game.slug === slug);
+},
+
+
+// ==================== FRIENDS ====================
+
+async fetchFriends(username) {
+  if (!username) throw new Error("Username required");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.get(`${API_URL}/${username}/friends`);
+    return response.data; // Array of { _id, username }
+  } catch (err) {
+
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+    // Add a friend
+  async addFriend(friendId) {
+    if (!this.currentUser) {
+
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `${API_URL}/${this.currentUser.username}/friends`,
+        { friendId },
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }
+      );
+
+
+
+      // Update local friends list reactively
+      this.currentUser.friends.push(friendId);
+    } catch (err) {
+
+      this.error = err.response?.data?.error || err.message;
+    }
+  },
+
+  // Remove a friend
+  async removeFriend(friendId) {
+    if (!this.currentUser) {
+
+      return;
+    }
+
+    try {
+      const res = await axios.delete(
+        `${API_URL}/${this.currentUser.username}/friends/${friendId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }
+      );
+
+
+      // Update local friends list reactively
+      this.currentUser.friends = this.currentUser.friends.filter(
+        (f) => f !== friendId
+      );
+    } catch (err) {
+  
+      this.error = err.response?.data?.error || err.message;
+    }
+  },
 
 
 };
 
+
+makeAutoObservable(UserModel, {}, { autoBind: true });
 export default UserModel;

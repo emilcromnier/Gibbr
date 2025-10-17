@@ -1,98 +1,145 @@
-import '/src/App.css'
+import '/src/App.css';
+import '/src/styles/game.css';
 import { observer } from 'mobx-react-lite';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
+const Game = observer((props) => {
+  const game = props.game;
+  const user = props.user;
+  const existingReview = props.existingReview;
+  const wishlist = props.wishlist || [];
 
-
-
-function Game(props) {
-    const game = props.game;
-    const [reviewText, setReviewText] = useState('');
-  const [rating, setRating] = useState(5); // default rating 5
+  const [reviewText, setReviewText] = useState('');
+  const [rating, setRating] = useState(5);
   const [submitting, setSubmitting] = useState(false);
-    
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const toggleDescription = () => { setShowFullDescription(!showFullDescription); };
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const descriptionRef = useRef(null);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      const { scrollHeight, clientHeight } = descriptionRef.current;
+      setIsOverflowing(scrollHeight > clientHeight + 5); // detect overflow
+    }
+  }, [game.description]);
+
   function handleAddToWishlist() {
-
-    props.onAddToWishlist(game);
+    if (props.onAddToWishlist && game) {
+      props.onAddToWishlist(game);
+    }
   }
 
-async function handleSubmitReview(e) {
-  e.preventDefault();
+  async function handleSubmitReview(e) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await props.onSubmitReview({
+        gameSlug: game.slug,
+        reviewText,
+        rating,
+        completed: false,
+        liked: false,
+      });
 
-  setSubmitting(true);
-
-  try {
-    // Call the presenter function with the data
-    await props.onSubmitReview({
-      gameSlug: game.slug,
-      reviewText,
-      rating,
-      completed: false, 
-      liked: false      
-    });
-
-    // Clear form on success
-    setReviewText("");
-    setRating(5);
-  } catch (err) {
-    console.error("Failed to submit review:", err);
-    alert("Error submitting review");
-  } finally {
-    setSubmitting(false);
+      setReviewText('');
+      setRating(5);
+    } finally {
+      setSubmitting(false);
+    }
   }
-}
 
-    
+  const inWishlist = wishlist.some((g) => g.slug === game.slug);
 
-  return(
-    <div className="game-details">
-      <h1>{game.title}</h1>
-      <img src={game.image} alt={game.title} style={{ width: "300px", borderRadius: "8px" }} />
-      <p><strong>Released:</strong> {game.released}</p>
-      <p>{game.description}</p>
-      <button onClick={handleAddToWishlist}>
-        Add to Wishlist
-      </button>
+  return (
+    <div className="game">
+      <h1 className="game__title">{game.title}</h1>
 
-            <h2>Submit a Review</h2>
-      <form onSubmit={handleSubmitReview}>
-        <div>
-          <label>Rating:</label>
-          {[1, 2, 3, 4, 5].map((num) => (
-            <label key={num} style={{ margin: "0 5px" }}>
-              <input
-                type="radio"
-                name="rating"
-                value={num}
-                checked={rating === num}
-                onChange={() => setRating(num)}
-              />
-              {num}
-            </label>
-          ))}
-        </div>
-
-        <div style={{ marginTop: "10px" }}>
-          <textarea
-            value={reviewText}
-            onChange={(e) => setReviewText(e.target.value)}
-            placeholder="Write your review here..."
-            rows={4}
-            style={{ width: "100%", padding: "5px" }}
+      <div className="game__info">
+        <div className="game__info--image">
+          <img
+            src={game.image}
+            alt={game.title}
+            className="game__image"
           />
+          <p className="game__release">
+            <strong>Released:</strong> {game.released}
+          </p>
         </div>
 
-        <button type="submit" disabled={submitting} style={{ marginTop: "10px" }}>
-          {submitting ? 'Submitting...' : 'Submit Review'}
+        <div className="game__info--details">
+
+          <div
+            ref={descriptionRef}
+            className={`game__description ${showFullDescription ? 'game__description--expanded' : ''}`}
+          >
+            <p>{game.description}</p>
+
+            {isOverflowing && !showFullDescription && (
+              <button className="game__description--toggle" onClick={toggleDescription}>
+                Read more
+              </button>
+            )}
+
+            {isOverflowing && showFullDescription && (
+              <button className="game__description--toggle" onClick={toggleDescription}>
+                Show less
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {!inWishlist && (
+        <button className="game__wishlist--button" onClick={handleAddToWishlist}>
+          Add to Wishlist
         </button>
-      </form>
+      )}
 
+      {existingReview ? (
+        <div className="game__review game__review--existing">
+          <p className="game__review--rating">⭐ You gave this game {existingReview.rating}/5</p>
+          <blockquote className="game__review--text">“{existingReview.reviewText}”</blockquote>
+        </div>
+      ) : (
+        <div className="game__review game__review--form">
+          <h2 className="game__review--title">Submit a Review</h2>
+          <form className="game__review--formcontainer" onSubmit={handleSubmitReview}>
+            <div className="game__review--ratinginput">
+              <label className="game__review--ratingoption">Rating:</label>
+              {[1, 2, 3, 4, 5].map((num) => (
+                <label key={num} style={{ margin: '0 5px' }}>
+                  <input
+                    type="radio"
+                    name="rating"
+                    value={num}
+                    checked={rating === num}
+                    onChange={() => setRating(num)}
+                    className="game__review--ratingradio"
+                  />
+                  {num}
+                </label>
+              ))}
+            </div>
+
+            <div className="game__review--textinput">
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                placeholder="Write your review here..."
+                rows={4}
+                className="game__review--textarea"
+              />
+            </div>
+
+            <button type="submit" disabled={submitting} className="game__review--submit">
+              {submitting ? 'Submitting...' : 'Submit Review'}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
-
-
-  )
-  
-  
-}
+  );
+});
 
 export default Game;

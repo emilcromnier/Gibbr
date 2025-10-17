@@ -35,6 +35,18 @@ router.get("/id/:id", async (req, res) => {
   }
 });
 
+// Get game by slug
+router.get("/slug/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const response = await axios.get(`https://api.rawg.io/api/games/${slug}?key=${API_KEY}`);
+    res.json(response.data);
+  } catch (err) {
+    console.error("Error fetching game by slug:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
  // Find all reviews for this game
 router.get("/:gameSlug/reviews", async (req, res) => {
   const { gameSlug } = req.params;

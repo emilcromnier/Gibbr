@@ -1,69 +1,67 @@
-import { observer } from 'mobx-react-lite';
-import Game from '../views/GameView';
-import { useParams } from 'react-router-dom';
+import { observer } from "mobx-react-lite";
+import Game from "../views/GameView";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
+export default observer(function GamePresenter({ model }) {
+  const { id } = useParams();
+  const userModel = model.user;
+  const gamesModel = model.games;
+  const [isLoaded, setIsLoaded] = useState(false);
 
-
-export default observer(
-function GamePresenter(props){
-    const { id } = useParams();
-    const userModel = props.model.user;
-
-    function onAddToWishlist(game){
-        
-
-        if (!userModel.currentUser) {
-            alert("You must be logged in to add games to your wishlist.");
-            return;
-        }
-
-        const username = userModel.currentUser.username;
-        const token = userModel.token;
-        console.log("GAMEOBJECT", game)
-
-        userModel
-            .addToWishlist(game, username, token)
-            .then(() => {
-            alert(`${game.title} added to wishlist!`);
-            })
-            .catch((err) => {
-            alert(`Failed to add to wishlist: ${err.message}`);
-            });
-
+  useEffect(() => {
+    async function loadGame() {
+      if (!id) return;
+      setIsLoaded(false);
+      await gamesModel.fetchGameById(id);
+      setIsLoaded(true);
     }
+    loadGame();
+  }, [id]);
 
-    async function onSubmitReview({ gameSlug, reviewText, rating }) {
-    if (!userModel.currentUser) {
-      alert("You must be logged in to submit a review.");
-      return;
-    }
+  const game = gamesModel.selectedGame;
+  const user = userModel.currentUser;
+
+  useEffect(() => {
+    if (user) userModel.fetchMyReviews(gamesModel);
+  }, [user]);
+
+  if (!isLoaded || !game) {
+    return <div>Loading game details...</div>;
+  }
+
+  // Use model helpers for clarity
+  const isInWishlist = userModel.isInWishlist(game.slug);
+  const existingReview = userModel.getReviewForGame(game.slug);
+
+  async function onAddToWishlist(game) {
+    if (!user) return;
 
     try {
-      // Optional: you could track submission/loading state here
-      console.log("PRESENTER:", gameSlug, reviewText, rating);
-      await userModel.submitReview({gameSlug, reviewText, rating}); // <-- model handles API call
-      alert("Review submitted successfully!");
+      await userModel.addToWishlist(game);
+
     } catch (err) {
-      alert(`Failed to submit review: ${err.message}`);
     }
   }
 
+  async function onSubmitReview({ gameSlug, reviewText, rating }) {
+    if (!user) return;
 
-    if (id) {
-
-
-        
-    props.model.games.fetchGameById(id);
-        
-   
+    try {
+      await userModel.submitReview({ gameSlug, reviewText, rating });
+ 
+    } catch (err) {
+  
     }
+  }
 
-    
-    if (!props.model.games.selectedGame || props.model.games.selectedGame.id !== Number(id)) {
-    return <div>Loading game details...</div>; // Show loading until the game is fetched
-    }
-
-
-    return <Game onSubmitReview={onSubmitReview} onAddToWishlist={onAddToWishlist} game={props.model.games.selectedGame}/>;
-    
-})
+  return (
+    <Game
+      game={game}
+      existingReview={existingReview}
+      isInWishlist={isInWishlist}
+      onSubmitReview={onSubmitReview}
+      onAddToWishlist={onAddToWishlist}
+    />
+  );
+});

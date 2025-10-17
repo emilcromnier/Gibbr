@@ -24,7 +24,10 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
-window.myModel= rootModel;   
+window.myModel= rootModel;  
+rootModel.user.restoreSession(); 
 rootModel.games.fetchTrendingGames();
-rootModel.user.restoreSession();
+rootModel.games.fetchTopRatedGames();
+rootModel.games.fetchRecentGames();
+
 

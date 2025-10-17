@@ -1,4 +1,5 @@
-import { searchGames, getTrendingGames, getGameById, getGameBySlug } from "./GameSource";
+import { searchGames, getTopRatedGames, getRecentGames, getTrendingGames, getGameById, getGameBySlug } from "./GameSource";
+import { makeAutoObservable } from "mobx";
 
 const GamesModel= {
   loading: false,
@@ -6,14 +7,16 @@ const GamesModel= {
 
   trendingGames: [],
   fetchedGames: [],
+    topRatedGames: [],
+  recentGames: [],
 
   async fetchTrendingGames() {
       if (this.trendingGames.length > 0) {
-        console.log("ALREADY FETCHED GAMES")
+     
     // already cached, skip API call
     return;
   }
-    console.log("FETCHING TRENDING FROM API")
+    
     const data = await getTrendingGames();
     this.trendingGames = data.results.map(game => ({
     id: game.id || game.slug, // use slug as fallback if id is missing
@@ -25,8 +28,39 @@ const GamesModel= {
 
   },
 
+  async fetchTopRatedGames() {
+    if (this.topRatedGames.length > 0) {
+     
+      return;
+    }
+  
+    const data = await getTopRatedGames();
+    this.topRatedGames = data.results.map(game => ({
+      id: game.id || game.slug,
+      slug: game.slug,
+      title: game.name,
+      image: game.background_image || "https://via.placeholder.com/150",
+    }));
+    this.fetchedGames.push(...this.topRatedGames);
+  },
+
+  async fetchRecentGames() {
+    if (this.recentGames.length > 0) {
+     
+      return;
+    }
+   
+    const data = await getRecentGames();
+    this.recentGames = data.results.map(game => ({
+      id: game.id || game.slug,
+      slug: game.slug,
+      title: game.name,
+      image: game.background_image || "https://via.placeholder.com/150",
+    }));
+    this.fetchedGames.push(...this.recentGames);
+  },
+
   async fetchGameById(id) {
- 
 
   try {
     this.loading = true;
@@ -38,13 +72,13 @@ const GamesModel= {
     );
 
     if (localGame) {
-      console.log("Using cached game:", localGame);
+  
       this.selectedGame = localGame;
       return; // Skip API call
     }
 
     //  If not found locally, fetch from API
-    console.log("Fetching from API");
+ 
     const data = await getGameById(id);
 
     this.selectedGame = {
@@ -63,7 +97,7 @@ const GamesModel= {
     this.fetchedGames.push(this.selectedGame);
 
   } catch (err) {
-    console.error("Error fetching game by ID:", err);
+
     this.error = err.message;
   } finally {
     this.loading = false;
