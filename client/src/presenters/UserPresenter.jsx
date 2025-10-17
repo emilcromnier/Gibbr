@@ -19,10 +19,12 @@ export default observer(function UserPresenter(props) {
   useEffect(() => {
     if (user) {
       props.model.user.fetchWishlistDetails(props.model.games, user);
+        props.model.user.fetchReviews(props.model.games, user.username);
     }
   }, [user, props.model.games, props.model.user]);
 
   const wishlist = props.model.user.otherWishlist || [];
+  const reviews = props.model.user.otherReviews || [];
 
   if (!user) return <div>Loading user...</div>;
 
@@ -40,6 +42,7 @@ export default observer(function UserPresenter(props) {
     <User
       user={user}
       username={username}
+      reviews={reviews}
       wishlist={wishlist}
     showAddFriend={showAddFriend}
       onAddFriend={handleAddFriend}

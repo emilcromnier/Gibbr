@@ -19,7 +19,7 @@ export default observer(function FriendsPresenter(props) {
         const data = await userModel.fetchFriends(user.username);
         userModel.friends = data;
       } catch (err) {
-        console.error("Failed to load friends:", err);
+     
       }
     }
 
@@ -33,13 +33,12 @@ export default observer(function FriendsPresenter(props) {
       await userModel.removeFriend(friendId);
       userModel.friends = userModel.friends.filter(f => f._id !== friendId);
     } catch (err) {
-      console.error("Failed to remove friend:", err);
+ 
     }
   }
 
-  // Optional: view friend profile
+ 
   function handleViewProfile(friend) {
-    console.log("Viewing profile for:", friend.username);
     window.location.hash = `#/user/${friend.username}`;
 
     // implement navigation if needed

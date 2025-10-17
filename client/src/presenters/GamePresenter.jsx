@@ -12,21 +12,23 @@ export default observer(function GamePresenter({ model }) {
   useEffect(() => {
     async function loadGame() {
       if (!id) return;
-      setIsLoaded(false);
       await gamesModel.fetchGameById(id);
-      setIsLoaded(true);
+     
     }
     loadGame();
   }, [id]);
 
   const game = gamesModel.selectedGame;
+  const loading = gamesModel.loading;
   const user = userModel.currentUser;
 
   useEffect(() => {
-    if (user) userModel.fetchMyReviews(gamesModel);
+    if (user) {
+        userModel.fetchReviews(gamesModel);
+    }
   }, [user]);
 
-  if (!isLoaded || !game) {
+  if (loading || !game || !game.description || !game.released) {
     return <div>Loading game details...</div>;
   }
 
@@ -57,6 +59,7 @@ export default observer(function GamePresenter({ model }) {
 
   return (
     <Game
+    user={user}
       game={game}
       existingReview={existingReview}
       isInWishlist={isInWishlist}

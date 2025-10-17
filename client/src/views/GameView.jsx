@@ -50,7 +50,6 @@ const Game = observer((props) => {
   }
 
   const inWishlist = wishlist.some((g) => g.slug === game.slug);
-
   return (
     <div className="game">
       <h1 className="game__title">{game.title}</h1>
@@ -90,11 +89,13 @@ const Game = observer((props) => {
         </div>
       </div>
 
-      {!inWishlist && (
+      {!inWishlist && user && (
         <button className="game__wishlist--button" onClick={handleAddToWishlist}>
           Add to Wishlist
         </button>
       )}
+
+      
 
       {existingReview ? (
         <div className="game__review game__review--existing">
