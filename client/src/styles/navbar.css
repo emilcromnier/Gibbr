@@ -1,7 +1,6 @@
 .navbar {
     display: flex;
     align-items: center;
-    background-color: #111;
     color: white;
     padding: 0 2rem;
     justify-content: space-between;
@@ -11,6 +10,12 @@
 .navbar__logo {
     height: 40px;
     width:  auto;
+}
+
+.navbar__logo:hover {
+    transform: scale(1.05); 
+    opacity: 0.85; 
+    cursor: pointer;
 }
 
 .navbar__center {

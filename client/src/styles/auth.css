@@ -80,3 +80,29 @@
 .auth .auth__toggle:hover {
   color: #fff;
 }
+
+.auth__success {
+  margin: 1rem auto 0;
+  padding: 0.8rem 1.2rem;
+  background-color: rgba(0, 255, 150, 0.1);
+  border: 1px solid rgba(0, 255, 150, 0.4);
+  color: #00ff9d;
+  font-weight: 500;
+  border-radius: 6px;
+  text-align: center;
+  width: fit-content;
+  min-width: 60%;
+  animation: pulseGlow 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(0, 255, 150, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(0, 255, 150, 0.4);
+  }
+}

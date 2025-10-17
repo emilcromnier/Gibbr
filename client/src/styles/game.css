@@ -102,6 +102,15 @@
   opacity: 1;
 }
 
+.game__wishlist {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
+
 .game__wishlist--button {
   background: rgba(255, 255, 255, 0.08);
   border: none;
@@ -110,12 +119,38 @@
   padding: 0.8rem 2rem;
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s ease;
-  width: fit-content;
+  transition: background 0.2s ease, transform 0.15s ease;
+  width: 220px;
+  text-align: center;
 }
 
 .game__wishlist--button:hover {
   background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.game__wishlist--toast {
+  margin-top: 0.8rem;
+  width: 220px;
+  text-align: center;
+  padding: 0.8rem 2rem;
+  border-radius: 10px;
+  background: rgba(0, 255, 150, 0.12);
+  border: 1px solid rgba(0, 255, 150, 0.35);
+  color: #00ff9d;
+  font-weight: 600;
+  font-size: 1rem;
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0, 255, 150, 0.12);
+  animation: toastPulse 1.8s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* Optional soft glowing pulse */
+@keyframes toastPulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
 }
 
 .game__review {
