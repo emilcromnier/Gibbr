@@ -14,7 +14,7 @@ function ProfilePresenter(props){
     useEffect(() => {
     if (!user) return;
     props.model.user.fetchWishlistDetails(props.model.games);
-    props.model.user.fetchMyReviews(props.model.games);
+    props.model.user.fetchReviews(props.model.games);
   }, [user]); // run only when `user` changes
 
   if (!user) {
@@ -54,8 +54,8 @@ function handleRemoveReview(reviewId) {
 
 
 
-  if (!wishlist.length) {
-    return <div>Loading wishlist...</div>;
+  if (loading) {
+    return <div>Loading...</div>;
     }
 
     
