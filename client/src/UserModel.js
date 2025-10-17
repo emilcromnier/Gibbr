@@ -363,10 +363,12 @@ async removeFromWishlist(gameOrSlug) {
 },
 
 async fetchUserByUsername(username) {
+  this.loading = true;  
   try {
     const response = await axios.get(`${API_URL}/${username}`);
    
     this.otherUser = response.data;
+    this.loading = false;
     return response.data;
   } catch (err) {
     if (err.response?.status === 404) {
