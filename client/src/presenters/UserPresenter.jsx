@@ -12,9 +12,12 @@ export default observer(function UserPresenter(props) {
   useEffect(() => {
     if (!username) return;
     props.model.user.fetchUserByUsername(username); // store user in usersByUsername
+    
+    console.log("USER", user);
   }, [username, props.model.user]);
 
-  const user = props.model.user.otherUser;
+    const user = props.model.user.otherUser;
+
 
   useEffect(() => {
     if (user) {
@@ -26,7 +29,7 @@ export default observer(function UserPresenter(props) {
   const wishlist = props.model.user.otherWishlist || [];
   const reviews = props.model.user.otherReviews || [];
 
-  if (!user) return <div>Loading user...</div>;
+  if (props.model.user.loading) return <div>Loading user...</div>;
 
     const handleAddFriend = () => {
     props.model.user.addFriend(user._id);

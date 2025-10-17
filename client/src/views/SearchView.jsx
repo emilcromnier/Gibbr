@@ -31,9 +31,6 @@ function Search(props) {
             <h3 className="search__user--name">
               Username: {props.result.user.username}
             </h3>
-            <p className="search__user--stats">
-              Games reviewed: {props.result.user.stats.gamesReviewed}
-            </p>
           </div>
         </div>
       )}

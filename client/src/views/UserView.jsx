@@ -74,7 +74,6 @@ function User(props) {
                 alt={game.title}
                 className='profile__wishlist--image'
               />
-              <p className='profile__wishlist--gametitle'>{game.title}</p>
             </div>
           ))}
         </div>
