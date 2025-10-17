@@ -175,6 +175,54 @@
     color: #cccccc;
 }
 
+.profile__review--actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 0.8rem;
+}
+
+.profile__review--updatebtn,
+.profile__review--deletebtn {
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.profile__review--updatebtn {
+    background: rgba(90, 255, 150, 0.1);
+    border: 1px solid rgba(90, 255, 150, 0.25);
+}
+
+.profile__review--updatebtn:hover {
+    background: rgba(90, 255, 150, 0.25);
+    box-shadow: 0 0 10px rgba(90, 255, 150, 0.3);
+    transform: scale(1.02);
+}
+
+.profile__review--deletebtn {
+    background: rgba(255, 80, 80, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.25);
+}
+
+.profile__review--deletebtn:hover {
+    background: rgba(255, 80, 80, 0.25);
+    box-shadow: 0 0 10px rgba(255, 80, 80, 0.3);
+    transform: scale(1.02);
+}
+
+.profile__review--updatebtn:active,
+.profile__review--deletebtn:active {
+    transform: scale(0.97);
+    box-shadow: none;
+}
+
 .profile__wishlist {
     position: relative;
     width: 100%;
