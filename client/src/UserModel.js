@@ -22,7 +22,9 @@ const UserModel = {
 
 
   
-  
+
+
+  //---------------------------------REVIEWS---------------------------------
     // Submit a new review
   async submitReview({ gameSlug, reviewText, rating, completed = false, liked = false }) {
     if (!this.token) throw new Error("Not authenticated");
@@ -52,15 +54,70 @@ const UserModel = {
     }
   },
 
+
+  // Update existing review
+async updateReview(reviewId, updatedData) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    const response = await axios.put(
+      `${REVIEW_URL}/${reviewId}`,
+      updatedData,
+      {
+        headers: { Authorization: `Bearer ${this.token}` },
+      }
+    );
+
+    const idx = this.reviews.findIndex(r => r.reviewId === reviewId);
+    if (idx !== -1) {
+      this.reviews[idx] = { ...this.reviews[idx], ...response.data };
+    }
+
+
+    return response.data;
+  } catch (err) {
+    console.error("Failed to update review:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
+// Delete a review
+async deleteReview(reviewId) {
+  if (!this.token) throw new Error("Not authenticated");
+
+  this.loading = true;
+  this.error = null;
+
+  try {
+    await axios.delete(`${REVIEW_URL}/${reviewId}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+
+    this.reviews = this.reviews.filter(r => r.reviewId !== reviewId);
+  } catch (err) {
+    console.error("Failed to delete review:", err);
+    this.error = err.response?.data?.error || err.message;
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+
   // Fetch all reviews for the current user
-  async fetchReviews(gamesModel, user = this.currentUser) {
+  async fetchMyReviews(gamesModel) {
   if (!this.token || !this.currentUser) return;
 
   this.loading = true;
   this.error = null;
 
   try {
-    const username = user.username;
+    const username = this.currentUser.username;
     const response = await axios.get(
       `${API_URL}/${username}/reviews`,
       {
@@ -83,6 +140,7 @@ const UserModel = {
           ...review,
           gameDetails: game, // attach game details here
         });
+        console.log("Testing" + review._id + " " + slug);
       } catch (err) {
         console.warn(`Failed to load game details for slug ${slug}:`, err);
         enrichedReviews.push(review); // fallback to raw review
@@ -102,6 +160,11 @@ const UserModel = {
   }
 },
 
+getReviewForGame(slug) {
+  return this.reviews.find(r => r.gameSlug === slug) || null;
+},
+
+// --------------------USERS & AUTH --------------------
   // Register a new user
   async register(username, email, password) {
     this.loading = true;
@@ -191,48 +254,43 @@ async restoreSession() {
   }
 },
 
-async addToWishlist(game, username, token) {
-    try {
-      const response = await axios.post(
-        `${API_URL}/${username}/backlog`,
-        { gameSlug: game.slug },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+async addToWishlist(game) {
+  if (!this.currentUser) throw new Error("Not authenticated");
 
-      this.wishlist.push(game); // update MobX state (optional)
-    } catch (err) {
-      this.error = err.response?.data?.error || err.message;
-      throw err;
-    }
-  },
+  const username = this.currentUser.username;
 
-
-  // inside UserModel (same file as addToWishlist)
-async removeFromWishlist(game, username, token) {
   try {
-    // Use the same API_URL you used for addToWishlist
-    const response = await axios.delete(
-      `${API_URL}/${username}/backlog/${encodeURIComponent(game.slug)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    await axios.post(
+      `${API_URL}/${username}/backlog`,
+      { gameSlug: game.slug },
+      { headers: { Authorization: `Bearer ${this.token}` } }
     );
 
-    // Update MobX observable state: remove the game locally
-    // Use assignment so MobX detects change if your model is observable
-    this.wishlist = (this.wishlist || []).filter(g => g.slug !== game.slug);
-
-    console.log("Removed from wishlist:", response.data);
-    return response.data;
+    this.wishlist.push(game); // update MobX state
   } catch (err) {
-    console.error("Failed to remove from wishlist:", err);
     this.error = err.response?.data?.error || err.message;
+    throw err;
+  }
+},
+
+
+async removeFromWishlist(gameOrSlug) {
+  if (!this.currentUser) throw new Error("Not authenticated");
+
+  const username = this.currentUser.username;
+  // Accept either a game object or slug string
+  const gameSlug = typeof gameOrSlug === "string" ? gameOrSlug : gameOrSlug.slug;
+
+  try {
+    await axios.delete(`${API_URL}/${username}/backlog/${gameSlug}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+    });
+
+    // Remove from local MobX state
+    this.wishlist = this.wishlist.filter(g => g.slug !== gameSlug);
+  } catch (err) {
+    this.error = err.response?.data?.error || err.message;
+    console.error("Error removing from wishlist:", err);
     throw err;
   }
 },
@@ -243,6 +301,7 @@ async removeFromWishlist(game, username, token) {
     this.loading = true;
     this.error = null;
 
+    // First check cache
     if (gamesModel && !fullResults) {
       const cachedGame = gamesModel.fetchedGames.find(game => game.slug === slug);
       if (cachedGame) {
@@ -291,7 +350,6 @@ async removeFromWishlist(game, username, token) {
     };
 
     this.selectedGame = singleGame;
-    gamesModel.fetchedGames.push(singleGame);
     return singleGame;
 
   } catch (err) {
@@ -327,40 +385,34 @@ async search(query, gamesModel) {
 
   const q = query.trim();
 
+
   //We use let here because foundUser and foundGames are initially declared and later conditionally 
   //assigned based on asynchronous fetch results. This way is clearer than creating extra functions just 
   // to keep using const. In other parts of the code we use const consistently for single-assignment variables.
   let foundUser = null;
   let foundGames = [];
 
-  // Try to find user by username
+
   try {
         foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
+    // No user found, fall through to game search
     if (err.response?.status !== 404) {
+      console.error("Error searching for user:", err);
+      throw err;
     }
   }
 
-  // Try to find games by slug (even if user search failed or succeeded)
   try {
+    //Try to find game by slug using caching
     const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
     console.log("Found games:", games);
-    foundGames = games;
+    return { type: "game", data: games };
   } catch (err) {
-   
+    console.error("No user or game found:", err);
+    return null;
   }
-
-  // return both results in one object
-  if (!foundUser && (!foundGames || foundGames.length === 0)) {
-    return null; // nothing found
-  }
-
-  return {
-    user: foundUser,    // can be null if not found
-    games: foundGames,  // can be empty []
-  };
 },
-
 
 async fetchWishlistDetails(gamesModel, user = this.currentUser) {
     this.otherWishlist.splice(0, this.otherWishlist.length);
@@ -392,6 +444,11 @@ async fetchWishlistDetails(gamesModel, user = this.currentUser) {
   targetList.push(...fetchedGames);
   this.loading = false;
 },
+
+isInWishlist(slug) {
+  return this.wishlist.some(game => game.slug === slug);
+},
+
 
 // ==================== FRIENDS ====================
 
@@ -473,6 +530,5 @@ async fetchFriends(username) {
 
 };
 
-makeAutoObservable(UserModel);
-import { makeAutoObservable } from "mobx";
+
 export default UserModel;
