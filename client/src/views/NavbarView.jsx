@@ -11,10 +11,6 @@ function Navbar(props) {
     const [showSearch, setShowSearch] = useState(false);
     const [query, setQuery] = useState("");
 
-    console.log("🔹 Navbar rendered");
-    console.log("🔹 props.currentUser:", props.currentUser);
-    console.log("🔹 currentUser type:", typeof props.currentUser);
-    console.log("🔹 currentUser keys:", props.currentUser ? Object.keys(props.currentUser) : "null");
     
     function handleKeyDown(e) {
         if (e.key === "Enter") {
