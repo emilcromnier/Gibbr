@@ -118,7 +118,7 @@ const Game = observer((props) => {
                 exit={{ opacity: 0, y: -10, scale: 0.97 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
-                ✅ Added to wishlist
+              Added to wishlist
               </motion.div>
             )}
           </AnimatePresence>

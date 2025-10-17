@@ -1,43 +1,48 @@
 import '/src/App.css';
 import '/src/styles/auth.css';
 import { useState } from "react";
-
-
-
+import { motion, AnimatePresence } from "framer-motion";
 
 function Auth(props) {
-const [mode, setMode] = useState("login"); // or 'register'
+  const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [registered, setRegistered] = useState(false);
 
-    function submitACB(e) {
+  async function submitACB(e) {
     e.preventDefault();
     if (mode === "login") {
       props.onLogin(usernameOrEmail, password);
     } else {
-      props.onRegister(username, email, password);
+      try {
+        await props.onRegister(username, email, password);
+        
+        setMode("login");
+        setUsername("");
+        setEmail("");
+        setPassword("");
+
+        setRegistered(true);
+        setTimeout(() => setRegistered(false), 2500);
+      } catch (err) {
+        console.error("Registration failed:", err);
+      }
     }
   }
 
-if (props.currentUser) {
+  if (props.currentUser) {
+    return (
+      <div className="auth">
+        Welcome, {props.currentUser.username}!{" "}
+        <button onClick={props.onLogout}>Logout</button>
+      </div>
+    );
+  }
+
   return (
     <div className="auth">
-      Welcome, {props.currentUser.username}!{" "}
-      <button onClick={props.onLogout}>
-        Logout
-      </button>
-    </div>
-  );
-}
-
-
-    
-
-  return(
-  
-<div className="auth">
       <h2>{mode === "login" ? "Login" : "Register"}</h2>
       <form onSubmit={submitACB}>
         {mode === "login" ? (
@@ -77,19 +82,35 @@ if (props.currentUser) {
             />
           </>
         )}
+
         <button type="submit">
           {mode === "login" ? "Login" : "Register"}
         </button>
+
+        {/* ✅ Animated success message */}
+        <AnimatePresence>
+          {registered && (
+            <motion.div
+              className="auth__success"
+              initial={{ opacity: 0, y: 15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+            User registered successfully!
+            </motion.div>
+          )}
+        </AnimatePresence>
       </form>
 
-      <button className="auth__toggle" onClick={() => setMode(mode === "login" ? "register" : "login")}>
+      <button
+        className="auth__toggle"
+        onClick={() => setMode(mode === "login" ? "register" : "login")}
+      >
         Switch to {mode === "login" ? "Register" : "Login"}
       </button>
     </div>
-
-  )
-  
-  
+  );
 }
 
 export default Auth;
