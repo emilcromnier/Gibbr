@@ -1,7 +1,7 @@
 import '/src/App.css';
 import '/src/styles/game.css';
 import { observer } from 'mobx-react-lite';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const Game = observer((props) => {
   const game = props.game;
@@ -14,6 +14,15 @@ const Game = observer((props) => {
   const [submitting, setSubmitting] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const toggleDescription = () => { setShowFullDescription(!showFullDescription); };
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const descriptionRef = useRef(null);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      const { scrollHeight, clientHeight } = descriptionRef.current;
+      setIsOverflowing(scrollHeight > clientHeight + 5); // detect overflow
+    }
+  }, [game.description]);
 
   function handleAddToWishlist() {
     if (props.onAddToWishlist && game) {
@@ -60,16 +69,19 @@ const Game = observer((props) => {
 
         <div className="game__info--details">
 
-          <div className={`game__description ${showFullDescription ? 'game__description--expanded' : ''}`}>
+          <div
+            ref={descriptionRef}
+            className={`game__description ${showFullDescription ? 'game__description--expanded' : ''}`}
+          >
             <p>{game.description}</p>
 
-            {!showFullDescription && (
+            {isOverflowing && !showFullDescription && (
               <button className="game__description--toggle" onClick={toggleDescription}>
                 Read more
               </button>
             )}
 
-            {showFullDescription && (
+            {isOverflowing && showFullDescription && (
               <button className="game__description--toggle" onClick={toggleDescription}>
                 Show less
               </button>
