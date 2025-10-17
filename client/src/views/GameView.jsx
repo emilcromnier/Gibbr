@@ -15,6 +15,12 @@ const Game = observer((props) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const toggleDescription = () => { setShowFullDescription(!showFullDescription); };
 
+  function handleAddToWishlist() {
+    if (props.onAddToWishlist && game) {
+      props.onAddToWishlist(game);
+    }
+  }
+
   async function handleSubmitReview(e) {
     e.preventDefault();
     setSubmitting(true);
