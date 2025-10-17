@@ -65,9 +65,7 @@ function handleRemoveReview(reviewId) {
     return <div>Loading wishlist...</div>;
     }
 
-    if (!wishlist.length) {
-    return <div>Nothing in wishlist</div>;
-    }
+    
 
 
     return (

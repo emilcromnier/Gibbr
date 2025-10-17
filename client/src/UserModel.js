@@ -19,6 +19,8 @@ const UserModel = {
   reviews: [],
   friends: [],
   currentlyPlaying: [],
+
+
   
 
 
@@ -452,60 +454,62 @@ async fetchFriends(username) {
   }
 },
 
-async addFriend(username, friendId) {
-  if (!this.token) throw new Error("Not authenticated");
+    // Add a friend
+  async addFriend(friendId) {
+    if (!this.currentUser) {
+      console.error("You must be logged in to add a friend");
+      return;
+    }
 
-  this.loading = true;
-  this.error = null;
+    try {
+      const res = await axios.post(
+        `${API_URL}/${this.currentUser.username}/friends`,
+        { friendId },
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }
+      );
 
-  try {
-    const response = await axios.post(
-      `${API_URL}/${username}/friends`,
-      { friendId },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }
-    );
+      console.log("Friend added:", res.data);
+      alert("Friend Added");
+      // Update local friends list reactively
+      this.currentUser.friends.push(friendId);
+    } catch (err) {
+      console.error("Error adding friend:", err);
+      this.error = err.response?.data?.error || err.message;
+    }
+  },
 
-    console.log("Friend added:", response.data);
-    return response.data;
-  } catch (err) {
-    console.error("Failed to add friend:", err);
-    this.error = err.response?.data?.error || err.message;
-    throw err;
-  } finally {
-    this.loading = false;
-  }
-},
+  // Remove a friend
+  async removeFriend(friendId) {
+    if (!this.currentUser) {
+      console.error("You must be logged in to remove a friend");
+      return;
+    }
 
-async removeFriend(username, friendId) {
-  if (!this.token) throw new Error("Not authenticated");
+    try {
+      const res = await axios.delete(
+        `${API_URL}/${this.currentUser.username}/friends/${friendId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }
+      );
 
-  this.loading = true;
-  this.error = null;
-
-  try {
-    const response = await axios.delete(
-      `${API_URL}/${username}/friends/${friendId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      }
-    );
-
-    console.log("Friend removed:", response.data);
-    return response.data;
-  } catch (err) {
-    console.error("Failed to remove friend:", err);
-    this.error = err.response?.data?.error || err.message;
-    throw err;
-  } finally {
-    this.loading = false;
-  }
-},
+      console.log("Friend removed:", res.data);
+      alert("FRIEND REMOVED");
+      // Update local friends list reactively
+      this.currentUser.friends = this.currentUser.friends.filter(
+        (f) => f !== friendId
+      );
+    } catch (err) {
+      console.error("Error removing friend:", err);
+      this.error = err.response?.data?.error || err.message;
+    }
+  },
 
 
 };

@@ -43,3 +43,23 @@ export async function getTrendingGames() {
     throw err;
   }
 }
+
+export async function getTopRatedGames() {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/games/top-rated`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching top rated games:", err);
+    throw err;
+  }
+}
+
+export async function getRecentGames() {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/games/recent`);
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching recent games:", err);
+    throw err;
+  }
+}

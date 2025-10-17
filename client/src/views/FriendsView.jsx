@@ -1,28 +1,30 @@
 // src/views/FriendsView.js
+import "/src/styles/friends.css";
+
 export default function FriendsView({ friends, loading, error, onRemoveFriend, onViewProfile }) {
-  if (loading) return <p className="text-gray-500">Loading friends...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!friends?.length) return <p>Bitchless 😔</p>;
+  if (loading) return <p className="friends__status friends__status--loading">Loading friends...</p>;
+  if (error) return <p className="friends__status friends__status--error">{error}</p>;
+  if (!friends?.length) return <p className="friends__status friends__status--empty">Bitchless 😔</p>;
 
   return (
-    <div className="p-4 space-y-2">
-      <h2 className="text-xl font-semibold">Your Friends</h2>
-      <ul className="space-y-2">
+    <div className="friends">
+      <h2 className="friends__title">Your Friends</h2>
+      <ul className="friends__list">
         {friends.map((f) => (
           <li
             key={f._id}
-            className="flex justify-between items-center bg-gray-800 text-white rounded-xl p-3"
+            className="friends__item"
           >
             <span
               onClick={() => onViewProfile(f)}
-              className="cursor-pointer hover:underline"
+              className="friends__name"
             >
               {f.username}
             </span>
 
             <button
               onClick={() => onRemoveFriend(f._id)}
-              className="text-sm text-red-400 hover:text-red-200"
+              className="friends__remove"
             >
               Remove
             </button>
