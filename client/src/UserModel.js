@@ -3,6 +3,7 @@ import axios from "axios";
 import { toJS } from "mobx";
 import { searchGames } from "./GameSource";
 import GamesModel from "./GamesModel";
+import { makeAutoObservable } from "mobx";
 
 const BACKEND_URL = "http://localhost:9000/api/auth";
 const API_URL = "http://localhost:9000/api/users";
@@ -534,4 +535,5 @@ async fetchFriends(username) {
 };
 
 
+makeAutoObservable(UserModel, {}, { autoBind: true });
 export default UserModel;
