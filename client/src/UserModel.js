@@ -112,7 +112,7 @@ async deleteReview(reviewId) {
 },
 
   async fetchReviews(gamesModel, username = this.currentUser?.username) {
-  if (!this.token || !username) return;
+  if (!username) return;
 
   this.loading = true;
   this.error = null;
