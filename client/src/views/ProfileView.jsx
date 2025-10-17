@@ -46,26 +46,17 @@ function Profile(props) {
               {/* Action Buttons */}
               <div
                 className="profile__review--actions"
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "8px",
-                }}
               >
                 <button
                   onClick={() => props.onUpdateReview(review.reviewId, review)}
-                  className="profile__review--button update"
+                  className="profile__review--updatebtn"
                 >
                   Update Review
                 </button>
 
                 <button
                   onClick={() => props.onRemoveReview(review.reviewId)}
-                  className="profile__review--button delete"
-                  style={{
-                    backgroundColor: "red",
-                    color: "white",
-                  }}
+                  className="profile__review--deletebtn"
                 >
                   Delete Review
                 </button>

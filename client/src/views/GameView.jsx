@@ -2,37 +2,48 @@ import '/src/App.css';
 import '/src/styles/game.css';
 import { observer } from 'mobx-react-lite';
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
 
 const Game = observer((props) => {
   const game = props.game;
   const user = props.user;
   const existingReview = props.existingReview;
   const wishlist = props.wishlist || [];
+  const descriptionRef = useRef(null);
 
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState(5);
   const [submitting, setSubmitting] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const toggleDescription = () => { setShowFullDescription(!showFullDescription); };
   const [isOverflowing, setIsOverflowing] = useState(false);
-  const descriptionRef = useRef(null);
+  const [wishlistToast, setWishlistToast] = useState(false);
+
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription);
+  };
 
   useEffect(() => {
     if (descriptionRef.current) {
       const { scrollHeight, clientHeight } = descriptionRef.current;
-      setIsOverflowing(scrollHeight > clientHeight + 5); // detect overflow
+      setIsOverflowing(scrollHeight > clientHeight + 5);
     }
   }, [game.description]);
 
-  function handleAddToWishlist() {
-    if (props.onAddToWishlist && game) {
-      props.onAddToWishlist(game);
+  async function handleAddToWishlist() {
+    if (!props.onAddToWishlist || !game) return;
+    try {
+      await props.onAddToWishlist(game);
+      setWishlistToast(true);
+      setTimeout(() => setWishlistToast(false), 2200);
+    } catch (e) {
+      console.error("Add to wishlist failed:", e);
     }
   }
 
   async function handleSubmitReview(e) {
     e.preventDefault();
     setSubmitting(true);
+
     try {
       await props.onSubmitReview({
         gameSlug: game.slug,
@@ -44,6 +55,9 @@ const Game = observer((props) => {
 
       setReviewText('');
       setRating(5);
+    } catch (err) {
+      console.error('Failed to submit review:', err);
+      alert('Error submitting review');
     } finally {
       setSubmitting(false);
     }
@@ -67,7 +81,6 @@ const Game = observer((props) => {
         </div>
 
         <div className="game__info--details">
-
           <div
             ref={descriptionRef}
             className={`game__description ${showFullDescription ? 'game__description--expanded' : ''}`}
@@ -90,9 +103,25 @@ const Game = observer((props) => {
       </div>
 
       {!inWishlist && user && (
-        <button className="game__wishlist--button" onClick={handleAddToWishlist}>
-          Add to Wishlist
-        </button>
+        <div className="game__wishlist">
+          <button className="game__wishlist--button" onClick={handleAddToWishlist}>
+            Add to Wishlist
+          </button>
+
+          <AnimatePresence>
+            {wishlistToast && (
+              <motion.div
+                className="game__wishlist--toast"
+                initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.97 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+              Added to wishlist
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
 
       
