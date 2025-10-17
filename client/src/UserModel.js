@@ -385,10 +385,12 @@ async search(query, gamesModel) {
 
   const q = query.trim();
 
+  let foundUser = null;
+  let games = [];
+
   try {
-        foundUser = await this.fetchUserByUsername(q);
+    foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
-    // No user found, fall through to game search
     if (err.response?.status !== 404) {
       console.error("Error searching for user:", err);
       throw err;
@@ -396,14 +398,19 @@ async search(query, gamesModel) {
   }
 
   try {
-    //Try to find game by slug using caching
-    const games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
-    console.log("Found games:", games);
-    return { type: "game", data: games };
+    games = await this.fetchGameBySlug(q, gamesModel, { fullResults: true });
   } catch (err) {
-    console.error("No user or game found:", err);
-    return null;
+    console.error("Game search failed:", err);
   }
+
+  if (foundUser || (games && games.length > 0)) {
+    return {
+      user: foundUser,
+      games: games || [],
+    };
+  }
+
+  return null;
 },
 
 async fetchWishlistDetails(gamesModel, user = this.currentUser) {
