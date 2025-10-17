@@ -385,6 +385,14 @@ async search(query, gamesModel) {
 
   const q = query.trim();
 
+
+  //We use let here because foundUser and foundGames are initially declared and later conditionally 
+  //assigned based on asynchronous fetch results. This way is clearer than creating extra functions just 
+  // to keep using const. In other parts of the code we use const consistently for single-assignment variables.
+  let foundUser = null;
+  let foundGames = [];
+
+
   try {
         foundUser = await this.fetchUserByUsername(q);
   } catch (err) {
