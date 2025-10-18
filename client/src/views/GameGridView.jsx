@@ -29,6 +29,10 @@ function GameGrid(props) {
             className="recommended-game"
             onClick={() => InspectGameACB(game.id)}
           >
+            <div className="recommended-game__text">
+              <p>We think you would like </p>
+              <h1>{game.title}</h1>
+            </div>
             <img
               className="recommended-game__img"
               key={game.id}
@@ -61,6 +65,7 @@ function GameGrid(props) {
             className="carousel__game"
             onClick={() => InspectGameACB(game.id)}
           >
+            <p className="carousel__game-title">{game.title}</p>
             <img
               className="carousel__game-img"
               key={game.id}
@@ -78,6 +83,7 @@ function GameGrid(props) {
             className="carousel__game"
             onClick={() => InspectGameACB(game.id)}
           >
+            <div className="carousel__game-title">{game.title}</div>
             <img
               className="carousel__game-img"
               key={game.id}
@@ -95,6 +101,7 @@ function GameGrid(props) {
             className="carousel__game"
             onClick={() => InspectGameACB(game.id)}
           >
+            <div className="carousel__game-title">{game.title}</div>
             <img
               className="carousel__game-img"
               key={game.id}

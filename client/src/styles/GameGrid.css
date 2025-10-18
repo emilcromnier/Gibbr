@@ -8,7 +8,22 @@
 .recommended-game {
   height: 100%;
   width: 50%;
+  position: relative; 
 }
+
+.recommended-game:hover {
+  cursor: pointer;
+}
+
+.recommended-game__text{
+  position: absolute;
+  width: calc(100% - 32px);
+  padding: 16px 24px;
+  bottom: 0;
+  z-index: 2;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
 .recommended-game__img {
   width: 100%;
   height: 100%;
@@ -49,12 +64,44 @@
   width: auto;
   flex-grow: 1;
   height: auto;
+  position: relative;
+  display: inline-block;
+}
+
+.carousel__game-title {
+  position: absolute;
+  padding: 16px;
+  bottom: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 2;
+}
+
+.carousel__game:hover .carousel__game-title {
+  opacity: 1;
 }
 
 .carousel__game-img {
   width: 100%;
   height: auto;
   border-radius: 8px;
+}
+
+.carousel__game::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.carousel__game:hover::after {
+  cursor: pointer;
+  background: #00000055;
 }
 
 @media screen and (max-width: 950px) {
