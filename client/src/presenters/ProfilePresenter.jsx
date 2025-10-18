@@ -35,22 +35,21 @@ function ProfilePresenter(props){
   userModel.removeFromWishlist(game);
 }
 
-function handleUpdateReview(reviewId, review) {
-  const newText = prompt("Update your review:", review.reviewText);
-  const newRating = parseInt(prompt("Update your rating (1–5):", review.rating), 10);
-
-  if (newText && newRating) {
-    userModel
-      .updateReview(reviewId, { reviewText: newText, rating: newRating });
+async function handleUpdateReview(reviewId, newData) {
+    try {
+      await userModel.updateReview(reviewId, newData);
+    } catch (err) {
+      console.error("Failed to update review:", err);
+    }
   }
-}
 
-function handleRemoveReview(reviewId) {
-  if (window.confirm("Are you sure you want to delete this review?")) {
-    userModel
-      .deleteReview(reviewId);
+  async function handleRemoveReview(reviewId) {
+    try {
+      await userModel.deleteReview(reviewId);
+    } catch (err) {
+      console.error("Failed to delete review:", err);
+    }
   }
-}
 
 
 
