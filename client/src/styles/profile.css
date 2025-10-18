@@ -175,6 +175,54 @@
     color: #cccccc;
 }
 
+.profile__review--actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 0.8rem;
+}
+
+.profile__review--updatebtn,
+.profile__review--deletebtn {
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.profile__review--updatebtn {
+    background: rgba(90, 255, 150, 0.1);
+    border: 1px solid rgba(90, 255, 150, 0.25);
+}
+
+.profile__review--updatebtn:hover {
+    background: rgba(90, 255, 150, 0.25);
+    box-shadow: 0 0 10px rgba(90, 255, 150, 0.3);
+    transform: scale(1.02);
+}
+
+.profile__review--deletebtn {
+    background: rgba(255, 80, 80, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.25);
+}
+
+.profile__review--deletebtn:hover {
+    background: rgba(255, 80, 80, 0.25);
+    box-shadow: 0 0 10px rgba(255, 80, 80, 0.3);
+    transform: scale(1.02);
+}
+
+.profile__review--updatebtn:active,
+.profile__review--deletebtn:active {
+    transform: scale(0.97);
+    box-shadow: none;
+}
+
 .profile__wishlist {
     position: relative;
     width: 100%;
@@ -269,4 +317,62 @@
 .profile__wishlist--remove:hover {
   background: rgba(255, 0, 0, 0.7);
   opacity: 1;
+}
+
+.profile__addfriend{
+    background: rgba(90, 255, 150, 0.1);
+    border: 1px solid rgba(90, 255, 150, 0.25);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 1rem;
+}
+
+.profile__addfriend:hover {
+    background: rgba(90, 255, 150, 0.25);
+    box-shadow: 0 0 10px rgba(90, 255, 150, 0.3);
+    transform: scale(1.02);
+}
+
+.profile__addfriend--wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.profile__addfriend--success {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 255, 150, 0.1);
+  border: 1px solid rgba(0, 255, 150, 0.4);
+  color: #00ff9d;
+  font-weight: 500;
+  border-radius: 6px;
+  text-align: center;
+  padding: 0.6rem 1.2rem;
+  width: fit-content;
+  min-width: 160px;
+  animation: pulseGlow 2s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(0, 255, 150, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(0, 255, 150, 0.4);
+  }
 }

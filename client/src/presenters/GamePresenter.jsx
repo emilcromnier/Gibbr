@@ -3,30 +3,32 @@ import Game from "../views/GameView";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-export default observer(function GamePresenter({ model }) {
+export default observer(function GamePresenter(props) {
   const { id } = useParams();
-  const userModel = model.user;
-  const gamesModel = model.games;
+  const userModel = props.model.user;
+  const gamesModel = props.model.games;
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadGame() {
       if (!id) return;
-      setIsLoaded(false);
       await gamesModel.fetchGameById(id);
-      setIsLoaded(true);
+     
     }
     loadGame();
   }, [id]);
 
   const game = gamesModel.selectedGame;
+  const loading = gamesModel.loading;
   const user = userModel.currentUser;
 
   useEffect(() => {
-    if (user) userModel.fetchMyReviews(gamesModel);
+    if (user) {
+        userModel.fetchReviews(gamesModel);
+    }
   }, [user]);
 
-  if (!isLoaded || !game) {
+  if (loading || !game || !game.description || !game.released) {
     return <div>Loading game details...</div>;
   }
 
@@ -55,12 +57,31 @@ export default observer(function GamePresenter({ model }) {
     }
   }
 
+  async function onUpdateReview(reviewId, updatedData) {
+    try {
+      await userModel.updateReview(reviewId, updatedData);
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
+  }
+
+  async function onDeleteReview(reviewId) {
+    try {
+      await userModel.deleteReview(reviewId);
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  }
+
   return (
     <Game
+    user={user}
       game={game}
       existingReview={existingReview}
       isInWishlist={isInWishlist}
       onSubmitReview={onSubmitReview}
+      onUpdateReview={onUpdateReview}
+      onDeleteReview={onDeleteReview}
       onAddToWishlist={onAddToWishlist}
     />
   );

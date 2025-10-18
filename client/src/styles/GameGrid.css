@@ -1,3 +1,6 @@
+p {
+  padding-bottom: 8px;
+}
 .hero {
   width: 100%;
   height: 25vw;
@@ -8,20 +11,20 @@
 .recommended-game {
   height: 100%;
   width: 50%;
-  position: relative; 
+  position: relative;
 }
 
 .recommended-game:hover {
   cursor: pointer;
 }
 
-.recommended-game__text{
+.recommended-game__text {
   position: absolute;
-  width: calc(100% - 32px);
-  padding: 16px 24px;
+  width: calc(100% - 48px);
+  padding: 24px;
   bottom: 0;
   z-index: 2;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
 }
 
 .recommended-game__img {
@@ -29,7 +32,10 @@
   height: 100%;
   object-fit: cover;
   border-radius: 8px;
+  object-position: top;
+  aspect-ratio: 16 / 9;
 }
+
 .shortcuts {
   height: 100%;
   width: 50%;
@@ -38,10 +44,25 @@
   justify-content: space-between;
   align-content: space-between;
 }
+
 .shortcuts__container {
   display: inline;
   height: calc(50% - 0.4vw);
   width: calc(50% - 0.4vw);
+  position: relative;
+}
+
+.shortcuts__container:hover {
+  cursor: pointer;
+}
+
+.shortcuts__container-text {
+  position: absolute;
+  width: calc(100%);
+  padding: 16px;
+  bottom: 0;
+  z-index: 2;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
 }
 
 .shortcuts__container-img {
@@ -49,23 +70,39 @@
   height: 100%;
   object-fit: cover;
   border-radius: 8px;
+  object-position: top;
+  aspect-ratio: 16 / 9;
 }
+
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  margin: 16px 0 32px 0;
+
+}
+
 .carousel {
-  width: 100%;
+  width: calc(100% + 32px);
   height: fit-content;
   display: flex;
   overflow-x: scroll;
+  scroll-behavior: smooth;
   gap: 0.8vw;
-  padding: 16px 0 32px 0;
+  white-space: nowrap;
   scrollbar-width: none;
 }
 
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
 .carousel__game {
-  width: auto;
-  flex-grow: 1;
-  height: auto;
+  flex: 0 0 calc(16.67% - 32px);
+  aspect-ratio: 16 / 9;
   position: relative;
-  display: inline-block;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
 .carousel__game-title {
@@ -75,6 +112,10 @@
   opacity: 0;
   transition: opacity 0.2s;
   z-index: 2;
+  width: calc(100% - 32px);
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .carousel__game:hover .carousel__game-title {
@@ -83,8 +124,10 @@
 
 .carousel__game-img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   border-radius: 8px;
+  object-position: top;
 }
 
 .carousel__game::after {
@@ -102,6 +145,32 @@
 .carousel__game:hover::after {
   cursor: pointer;
   background: #00000055;
+}
+
+.carousel-button {
+  position: absolute;
+  border: none;
+  cursor: pointer;
+  z-index: 3;
+  height: 100%;
+  width: 48px;
+  padding: 0;
+  align-self: center;
+}
+
+.carousel-button__arrow {
+  height: 32px;
+  width: auto;
+}
+
+.carousel-button.left {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.carousel-button.right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
 }
 
 @media screen and (max-width: 950px) {

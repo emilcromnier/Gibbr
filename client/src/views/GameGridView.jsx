@@ -1,30 +1,93 @@
 import "/src/App.css";
 import "/src/styles/GameGrid.css";
-import { useState, useEffect } from "react";
+import { useRef, useState } from "react";
+import leftArrow from "../assets/leftArrow.svg";
+import rightArrow from "../assets/rightArrow.svg";
 
 function GameGrid(props) {
-  const [maxGames, setMaxGames] = useState(window.innerWidth <= 950 ? 3 : 6);
-  const trendingGames = props.trendingGames;
-  const topRatedGames = props.topRatedGames;
-  const recentlyReleasedGames = props.recentlyReleasedGames;
-
-  useEffect(() => {
-    function handleResize() {
-      setMaxGames(window.innerWidth <= 950 ? 3 : 6);
-    }
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   function InspectGameACB(gameId) {
     window.location.hash = `#/game/${gameId}`;
   }
 
+  function Carousel({ games }) {
+  const carouselRef = useRef(null);
+  const [hovered, setHovered] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true); // initially can scroll right
+
+  const maxVisible = 24;
+  const limitedGames = games.slice(0, maxVisible);
+
+  const scrollAmount = () => carouselRef.current.offsetWidth;
+
+  const updateScrollButtons = () => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    setCanScrollLeft(el.scrollLeft > 0);
+    // Account for fractional pixels
+    setCanScrollRight(el.scrollLeft + el.offsetWidth < el.scrollWidth - 1);
+  };
+
+  const scrollLeft = () => {
+    carouselRef.current.scrollBy({
+      left: -scrollAmount(),
+      behavior: "smooth",
+    });
+  };
+
+  const scrollRight = () => {
+    carouselRef.current.scrollBy({
+      left: scrollAmount(),
+      behavior: "smooth",
+    });
+  };
+
+  const handleScroll = () => updateScrollButtons();
+
+    return (
+      <div
+        className="carousel-wrapper"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {hovered && canScrollLeft && (
+          <button className="carousel-button left" onClick={scrollLeft}>
+            <img className="carousel-button__arrow" src={leftArrow} alt="leftArrow" />
+          </button>
+        )}
+
+        <div className="carousel" ref={carouselRef} onScroll={handleScroll}>
+          {limitedGames.map((game) => (
+            <div
+              className="carousel__game"
+              key={game.id}
+              onClick={() => InspectGameACB(game.id)}
+            >
+              <p className="carousel__game-title">{game.title}</p>
+              <img
+                className="carousel__game-img"
+                src={game.image}
+                alt={game.title}
+              />
+            </div>
+          ))}
+        </div>
+
+        {hovered && canScrollRight && (
+          <button className="carousel-button right" onClick={scrollRight}>
+            <img className="carousel-button__arrow" src={rightArrow} alt="rightArrow" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div>
+      {/* HERO SECTION */}
       <div className="hero">
-        {trendingGames.slice(0, 1).map((game) => (
+        {props.trendingGames.slice(0, 1).map((game) => (
           <div
             className="recommended-game"
             onClick={() => InspectGameACB(game.id)}
@@ -41,12 +104,16 @@ function GameGrid(props) {
             />
           </div>
         ))}
+
         <div className="shortcuts">
-          {topRatedGames.slice(0, 4).map((game) => (
+          {props.trendingGames.slice(1, 5).map((game) => (
             <div
               className="shortcuts__container"
               onClick={() => InspectGameACB(game.id)}
             >
+              <div className="shortcuts__container-text">
+                <h2>{game.title}</h2>
+              </div>
               <img
                 className="shortcuts__container-img"
                 key={game.id}
@@ -58,59 +125,15 @@ function GameGrid(props) {
         </div>
       </div>
 
-      <h2>Trending</h2>
-      <div className="carousel">
-        {trendingGames.slice(0, maxGames).map((game) => (
-          <div
-            className="carousel__game"
-            onClick={() => InspectGameACB(game.id)}
-          >
-            <p className="carousel__game-title">{game.title}</p>
-            <img
-              className="carousel__game-img"
-              key={game.id}
-              src={game.image}
-              alt={game.title}
-            />
-          </div>
-        ))}
-      </div>
+      {/* CAROUSELS */}
+      <h3>Top Rated</h3>
+      <Carousel games={props.topRatedGames} />
 
-      <h2>Top rated</h2>
-      <div className="carousel">
-        {topRatedGames.slice(0, maxGames).map((game) => (
-          <div
-            className="carousel__game"
-            onClick={() => InspectGameACB(game.id)}
-          >
-            <div className="carousel__game-title">{game.title}</div>
-            <img
-              className="carousel__game-img"
-              key={game.id}
-              src={game.image}
-              alt={game.title}
-            />
-          </div>
-        ))}
-      </div>
+      <h3>Recently Released</h3>
+      <Carousel games={props.recentlyReleasedGames} />
 
-      <h2>Recently released</h2>
-      <div className="carousel">
-        {recentlyReleasedGames.slice(0, maxGames).map((game) => (
-          <div
-            className="carousel__game"
-            onClick={() => InspectGameACB(game.id)}
-          >
-            <div className="carousel__game-title">{game.title}</div>
-            <img
-              className="carousel__game-img"
-              key={game.id}
-              src={game.image}
-              alt={game.title}
-            />
-          </div>
-        ))}
-      </div>
+      <h3>Trending</h3>
+      <Carousel games={props.trendingGames} />
     </div>
   );
 }

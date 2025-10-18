@@ -16,6 +16,7 @@ const UserModel = {
   error: null,
   wishlist: [],
   otherWishlist: [],
+  otherReviews: [],
   otherUser: null,
   reviews: [],
   friends: [],
@@ -110,15 +111,13 @@ async deleteReview(reviewId) {
   }
 },
 
-  // Fetch all reviews for the current user
-  async fetchMyReviews(gamesModel) {
-  if (!this.token || !this.currentUser) return;
+  async fetchReviews(gamesModel, username = this.currentUser?.username) {
+  if (!username) return;
 
   this.loading = true;
   this.error = null;
 
   try {
-    const username = this.currentUser.username;
     const response = await axios.get(
       `${API_URL}/${username}/reviews`,
       {
@@ -128,38 +127,40 @@ async deleteReview(reviewId) {
 
     const reviews = response.data;
 
-    // Enrich each review with the game's details
+    // Enrich each review with game details
     const enrichedReviews = [];
     for (const review of reviews) {
       const slug = review.gameSlug;
 
       try {
-        // Reuse your existing fetchGameBySlug with caching
         const game = await this.fetchGameBySlug(slug, gamesModel);
 
         enrichedReviews.push({
           ...review,
-          gameDetails: game, // attach game details here
+          gameDetails: game, // attach game details
         });
-   
       } catch (err) {
-
+        console.warn(`Failed to load game for slug ${slug}`, err);
         enrichedReviews.push(review); // fallback to raw review
       }
     }
 
-    this.reviews = enrichedReviews;
+    // Store reviews in the appropriate observable
+    if (username === this.currentUser?.username) {
+      this.reviews = enrichedReviews;
+    } else {
+      this.otherReviews = enrichedReviews;
+    }
 
-
-    return this.reviews;
+    return enrichedReviews;
   } catch (err) {
-
     this.error = err.response?.data?.error || err.message;
     throw err;
   } finally {
     this.loading = false;
   }
 },
+
 
 getReviewForGame(slug) {
   return this.reviews.find(r => r.gameSlug === slug) || null;
@@ -327,7 +328,7 @@ async removeFromWishlist(gameOrSlug) {
         slug: gameData.slug,
         title: gameData.name,
         description: gameData.description_raw || gameData.description || "No description available",
-        image: gameData.background_image || "https://via.placeholder.com/150",
+        image: gameData.background_image,
         released: gameData.released,
         rating: gameData.rating,
         platforms: gameData.platforms?.map(p => p.platform.name) || [],
@@ -343,7 +344,7 @@ async removeFromWishlist(gameOrSlug) {
       slug: gameData.slug,
       title: gameData.name,
       description: gameData.description_raw || gameData.description || "No description available",
-      image: gameData.background_image || "https://via.placeholder.com/150",
+      image: gameData.background_image,
       released: gameData.released,
       rating: gameData.rating,
       platforms: gameData.platforms?.map(p => p.platform.name) || [],
@@ -362,10 +363,12 @@ async removeFromWishlist(gameOrSlug) {
 },
 
 async fetchUserByUsername(username) {
+  this.loading = true;  
   try {
     const response = await axios.get(`${API_URL}/${username}`);
    
     this.otherUser = response.data;
+    this.loading = false;
     return response.data;
   } catch (err) {
     if (err.response?.status === 404) {
@@ -383,6 +386,7 @@ async fetchUserByUsername(username) {
 
 async search(query, gamesModel) {
   if (!query || query.trim() === "") return null;
+  this.loading = true;
 
   const q = query.trim();
 
@@ -410,12 +414,14 @@ async search(query, gamesModel) {
   }
 
   if (foundUser || (games && games.length > 0)) {
+    this.loading = false;
     return {
       user: foundUser,
       games: games || [],
     };
   }
 
+  this.loading = false;
   return null;
 },
 
