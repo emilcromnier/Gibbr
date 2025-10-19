@@ -18,7 +18,7 @@ function GameGrid(props) {
     const maxVisible = 24;
     const limitedGames = games.slice(0, maxVisible);
 
-    const scrollAmount = () => carouselRef.current.offsetWidth;
+    const scrollAmount = () => carouselRef.current.offsetWidth / 2;
 
     const updateScrollButtons = () => {
       const el = carouselRef.current;
