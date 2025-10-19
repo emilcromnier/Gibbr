@@ -3,6 +3,7 @@ import '/src/styles/game.css';
 import { observer } from 'mobx-react-lite';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
+import backArrow from '../assets/backArrow.svg';
 
 const Game = observer((props) => {
   const game = props.game;
@@ -88,6 +89,9 @@ const Game = observer((props) => {
   const inWishlist = wishlist.some((g) => g.slug === game.slug);
   return (
     <div className="game">
+      <button onClick={() => window.history.back()} className='back-button'>
+        <img src={backArrow} alt="Back" className='back-button__arrow'/>
+      </button>
       <h1 className="game__title">{game.title}</h1>
 
       <div className="game__info">
