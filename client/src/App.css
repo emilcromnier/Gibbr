@@ -20,3 +20,21 @@ body {
   top: 0;
   background-color: black;
 }
+
+.back-button {
+  position: absolute;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  z-index: 3;
+  height: 32px;
+  width: 32px;
+  padding: 0;
+  top: calc(70px + 32px); /* Header + padding*/
+  left: 32px;
+}
+
+.back-button__arrow {
+  height: 100%;
+  width: auto;
+}
