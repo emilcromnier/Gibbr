@@ -10,40 +10,40 @@ function GameGrid(props) {
   }
 
   function Carousel({ games }) {
-  const carouselRef = useRef(null);
-  const [hovered, setHovered] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true); // initially can scroll right
+    const carouselRef = useRef(null);
+    const [hovered, setHovered] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true); // initially can scroll right
 
-  const maxVisible = 24;
-  const limitedGames = games.slice(0, maxVisible);
+    const maxVisible = 24;
+    const limitedGames = games.slice(0, maxVisible);
 
-  const scrollAmount = () => carouselRef.current.offsetWidth;
+    const scrollAmount = () => carouselRef.current.offsetWidth;
 
-  const updateScrollButtons = () => {
-    const el = carouselRef.current;
-    if (!el) return;
+    const updateScrollButtons = () => {
+      const el = carouselRef.current;
+      if (!el) return;
 
-    setCanScrollLeft(el.scrollLeft > 0);
-    // Account for fractional pixels
-    setCanScrollRight(el.scrollLeft + el.offsetWidth < el.scrollWidth - 1);
-  };
+      setCanScrollLeft(el.scrollLeft > 0);
+      // Account for fractional pixels
+      setCanScrollRight(el.scrollLeft + el.offsetWidth < el.scrollWidth - 1);
+    };
 
-  const scrollLeft = () => {
-    carouselRef.current.scrollBy({
-      left: -scrollAmount(),
-      behavior: "smooth",
-    });
-  };
+    const scrollLeft = () => {
+      carouselRef.current.scrollBy({
+        left: -scrollAmount(),
+        behavior: "smooth",
+      });
+    };
 
-  const scrollRight = () => {
-    carouselRef.current.scrollBy({
-      left: scrollAmount(),
-      behavior: "smooth",
-    });
-  };
+    const scrollRight = () => {
+      carouselRef.current.scrollBy({
+        left: scrollAmount(),
+        behavior: "smooth",
+      });
+    };
 
-  const handleScroll = () => updateScrollButtons();
+    const handleScroll = () => updateScrollButtons();
 
     return (
       <div
@@ -53,7 +53,11 @@ function GameGrid(props) {
       >
         {hovered && canScrollLeft && (
           <button className="carousel-button left" onClick={scrollLeft}>
-            <img className="carousel-button__arrow" src={leftArrow} alt="leftArrow" />
+            <img
+              className="carousel-button__arrow"
+              src={leftArrow}
+              alt="leftArrow"
+            />
           </button>
         )}
 
@@ -76,7 +80,11 @@ function GameGrid(props) {
 
         {hovered && canScrollRight && (
           <button className="carousel-button right" onClick={scrollRight}>
-            <img className="carousel-button__arrow" src={rightArrow} alt="rightArrow" />
+            <img
+              className="carousel-button__arrow"
+              src={rightArrow}
+              alt="rightArrow"
+            />
           </button>
         )}
       </div>
@@ -126,14 +134,15 @@ function GameGrid(props) {
       </div>
 
       {/* CAROUSELS */}
-      <h3>Top Rated</h3>
-      <Carousel games={props.topRatedGames} />
+
+      <h3>Trending</h3>
+      <Carousel games={props.trendingGames} />
 
       <h3>Recently Released</h3>
       <Carousel games={props.recentlyReleasedGames} />
 
-      <h3>Trending</h3>
-      <Carousel games={props.trendingGames} />
+      <h3>Top Rated</h3>
+      <Carousel games={props.topRatedGames} />
     </div>
   );
 }
