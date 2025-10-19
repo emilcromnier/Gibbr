@@ -136,7 +136,7 @@ function GameGrid(props) {
       {/* CAROUSELS */}
 
       <h3>Trending</h3>
-      <Carousel games={props.trendingGames} />
+      <Carousel games={props.trendingGames.slice(5)} />
 
       <h3>Recently Released</h3>
       <Carousel games={props.recentlyReleasedGames} />
