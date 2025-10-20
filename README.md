@@ -9,7 +9,7 @@ Project for the Advanced Interaction Programming course DH2643
 
 ### Prerequisites
 
-- Docker installed
+- Docker installed (and running)
 
 - Docker Compose (included with Docker Desktop)
 
