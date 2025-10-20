@@ -161,12 +161,12 @@ const Game = observer((props) => {
             “{existingReview.reviewText}”
           </blockquote>
           <div className="game__review--actions">
-            <button onClick={() => setIsEditing(true)} className="game__review--edit">
+            <button onClick={() => setIsEditing(true)} className="reviewbtn--primary">
               Edit Review
             </button>
             <button
               onClick={handleDeleteReview}
-              className="game__review--delete"
+              className="reviewbtn--secondary"
               style={{ backgroundColor: 'red', color: 'white' }}
             >
               Delete Review

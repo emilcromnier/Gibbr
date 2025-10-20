@@ -15,7 +15,6 @@ function Profile(props) {
     <div className="profile">
       <div className="profile__header">
         <h1>{username}</h1>
-        <p>{description}</p>
       </div>
 
       <div className="profile__main--content">
@@ -114,10 +113,10 @@ const EditableReviewItem = observer((props) => {
             />
 
             <div className="profile__review--editactions">
-              <button onClick={handleSave} disabled={saving} className="profile__review--savebtn">
+              <button onClick={handleSave} disabled={saving} className="reviewbtn reviewbtn--primary">
                 {saving ? "Saving..." : "Save"}
               </button>
-              <button onClick={() => setIsEditing(false)} className="profile__review--cancelbtn">
+              <button onClick={() => setIsEditing(false)} className="reviewbtn reviewbtn--secondary">
                 Cancel
               </button>
             </div>
@@ -130,10 +129,10 @@ const EditableReviewItem = observer((props) => {
             <p className="profile__review--text">{review.reviewText}</p>
 
             <div className="profile__review--actions">
-              <button onClick={() => setIsEditing(true)} className="profile__review--updatebtn">
+              <button onClick={() => setIsEditing(true)} className="reviewbtn reviewbtn--primary">
                 Update
               </button>
-              <button onClick={() => onRemoveReview(review.reviewId)} className="profile__review--deletebtn">
+              <button onClick={() => onRemoveReview(review.reviewId)} className="reviewbtn reviewbtn--secondary">
                 Delete
               </button>
             </div>
