@@ -7,17 +7,6 @@ Project for the Advanced Interaction Programming course DH2643
 
 ## This project uses Docker and Docker Compose to run both the backend and frontend in separate containers.
 
-### Project Structure
-.
-├── client/
-│   ├── Dockerfile
-│   └── ...
-├── server/
-│   ├── Dockerfile
-│   └── ...
-├── docker-compose.yml
-
-
 ### Prerequisites
 
 - Docker installed
