@@ -4,17 +4,24 @@ services:
 
   server:
     build: ./server
+    image: janssonm/gibbr-server:1.0
     ports:
       - "9000:8080"
     environment:
+      - NODE_ENV=production
       - MONGO_URI=mongodb+srv://gibbradmin:skeletonkey@gibbrcluster.uchffb9.mongodb.net/gibbr?retryWrites=true&w=majority
       - JWT_SECRET=EmilMatildaAlexPontusGibbr
       - RAWG_API_KEY=77d89f43b46a4dfe95c8153ef56e94dc
       - PORT=8080     # app listens on 8080 inside container
+    restart: unless-stopped
 
   client:
     build: ./client
+    image: janssonm/gibbr-client:1.0
     ports:
       - "3000:80"
+    environment:
+      - NODE_ENV=production
     depends_on:
       - server
+    restart: unless-stopped
