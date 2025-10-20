@@ -1,23 +1,19 @@
-import { observer } from 'mobx-react-lite';
-import GameGrid from '../views/GameGridView';
+import { observer } from "mobx-react-lite";
+import GameGrid from "../views/GameGridView";
 
 
+function GameGridPresenter(props) {
+  const { games: gameStore } = props.model;
 
-export default observer(
+  const trendingGames = gameStore.trendingGames;
 
+  const recentlyReleasedGames = gameStore.recentGames;
 
-    
-    
-function GameGridPresenter(props){
+  const topRatedGames = gameStore.topRatedGames;
 
-    const trendingGames = props.model.games.trendingGames;
-    const recentlyReleasedGames = props.model.games.recentGames;
-    const topRatedGames = props.model.games.topRatedGames;
+  return <GameGrid recentlyReleasedGames={recentlyReleasedGames} topRatedGames={topRatedGames} trendingGames = {trendingGames}/>;
+}
 
+const ObservedGameGridPresenter = observer(GameGridPresenter);
 
-
-
-
-    return <GameGrid recentlyReleasedGames={recentlyReleasedGames} topRatedGames={topRatedGames} trendingGames = {trendingGames} />;
-    
-})
+export default ObservedGameGridPresenter;

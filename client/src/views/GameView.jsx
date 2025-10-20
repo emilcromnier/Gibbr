@@ -3,6 +3,7 @@ import '/src/styles/game.css';
 import { observer } from 'mobx-react-lite';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
+import backArrow from '../assets/backArrow.svg';
 
 const Game = observer((props) => {
   const game = props.game;
@@ -17,6 +18,7 @@ const Game = observer((props) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [wishlistToast, setWishlistToast] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription);
@@ -28,6 +30,13 @@ const Game = observer((props) => {
       setIsOverflowing(scrollHeight > clientHeight + 5);
     }
   }, [game.description]);
+
+  useEffect(() => {
+    if (existingReview) {
+      setReviewText(existingReview.reviewText || '');
+      setRating(existingReview.rating || 5);
+    }
+  }, [existingReview]);
 
   async function handleAddToWishlist() {
     if (!props.onAddToWishlist || !game) return;
@@ -43,16 +52,19 @@ const Game = observer((props) => {
   async function handleSubmitReview(e) {
     e.preventDefault();
     setSubmitting(true);
-
     try {
-      await props.onSubmitReview({
-        gameSlug: game.slug,
-        reviewText,
-        rating,
-        completed: false,
-        liked: false,
-      });
-
+      if (isEditing && existingReview) {
+        await props.onUpdateReview(existingReview.reviewId, { reviewText, rating });
+        setIsEditing(false);
+      } else {
+        await props.onSubmitReview({
+          gameSlug: game.slug,
+          reviewText,
+          rating,
+          completed: false,
+          liked: false,
+        });
+      }
       setReviewText('');
       setRating(5);
     } catch (err) {
@@ -63,9 +75,23 @@ const Game = observer((props) => {
     }
   }
 
+  // --- Delete Review ---
+  async function handleDeleteReview() {
+    if (existingReview && props.onDeleteReview) {
+      try {
+        await props.onDeleteReview(existingReview.reviewId);
+      } catch (err) {
+        console.error("Failed to delete review:", err);
+      }
+    }
+  }
+
   const inWishlist = wishlist.some((g) => g.slug === game.slug);
   return (
     <div className="game">
+      <button onClick={() => window.history.back()} className='back-button'>
+        <img src={backArrow} alt="Back" className='back-button__arrow'/>
+      </button>
       <h1 className="game__title">{game.title}</h1>
 
       <div className="game__info">
@@ -126,47 +152,89 @@ const Game = observer((props) => {
 
       
 
-      {existingReview ? (
+      {existingReview && !isEditing ? (
         <div className="game__review game__review--existing">
-          <p className="game__review--rating">⭐ You gave this game {existingReview.rating}/5</p>
-          <blockquote className="game__review--text">“{existingReview.reviewText}”</blockquote>
+          <p className="game__review--rating">
+            ⭐ You gave this game {existingReview.rating}/5
+          </p>
+          <blockquote className="game__review--text">
+            “{existingReview.reviewText}”
+          </blockquote>
+          <div className="game__review--actions">
+            <button onClick={() => setIsEditing(true)} className="game__review--edit">
+              Edit Review
+            </button>
+            <button
+              onClick={handleDeleteReview}
+              className="game__review--delete"
+              style={{ backgroundColor: 'red', color: 'white' }}
+            >
+              Delete Review
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="game__review game__review--form">
-          <h2 className="game__review--title">Submit a Review</h2>
-          <form className="game__review--formcontainer" onSubmit={handleSubmitReview}>
-            <div className="game__review--ratinginput">
-              <label className="game__review--ratingoption">Rating:</label>
-              {[1, 2, 3, 4, 5].map((num) => (
-                <label key={num} style={{ margin: '0 5px' }}>
-                  <input
-                    type="radio"
-                    name="rating"
-                    value={num}
-                    checked={rating === num}
-                    onChange={() => setRating(num)}
-                    className="game__review--ratingradio"
-                  />
-                  {num}
-                </label>
-              ))}
-            </div>
+        user && (
+          <div className="game__review game__review--form">
+            <h2 className="game__review--title">
+              {isEditing ? 'Edit Your Review' : 'Submit a Review'}
+            </h2>
+            <form
+              className="game__review--formcontainer"
+              onSubmit={handleSubmitReview}
+            >
+              <div className="game__review--ratinginput">
+                <label className="game__review--ratingoption">Rating:</label>
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <label key={num} style={{ margin: '0 5px' }}>
+                    <input
+                      type="radio"
+                      name="rating"
+                      value={num}
+                      checked={rating === num}
+                      onChange={() => setRating(num)}
+                      className="game__review--ratingradio"
+                    />
+                    {num}
+                  </label>
+                ))}
+              </div>
 
-            <div className="game__review--textinput">
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                placeholder="Write your review here..."
-                rows={4}
-                className="game__review--textarea"
-              />
-            </div>
+              <div className="game__review--textinput">
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="Write your review here..."
+                  rows={4}
+                  className="game__review--textarea"
+                />
+              </div>
 
-            <button type="submit" disabled={submitting} className="game__review--submit">
-              {submitting ? 'Submitting...' : 'Submit Review'}
-            </button>
-          </form>
-        </div>
+              <div className="game__review--buttons">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="game__review--submit"
+                >
+                  {submitting
+                    ? 'Saving...'
+                    : isEditing
+                    ? 'Update Review'
+                    : 'Submit Review'}
+                </button>
+                {isEditing && (
+                  <button
+                    type="button"
+                    className="game__review--cancel"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        )
       )}
     </div>
   );
