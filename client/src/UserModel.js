@@ -5,9 +5,10 @@ import { searchGames } from "./GameSource";
 import GamesModel from "./GamesModel";
 import { makeAutoObservable } from "mobx";
 
-const BACKEND_URL = "http://localhost:9000/api/auth";
-const API_URL = "http://localhost:9000/api/users";
-const REVIEW_URL = "http://localhost:9000/api/reviews";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:9000/api";
+const BACKEND_URL = `${BASE_URL}/auth`;
+const API_URL = `${BASE_URL}/users`;
+const REVIEW_URL = `${BASE_URL}/reviews`;
 
 const UserModel = {
   token: null,
