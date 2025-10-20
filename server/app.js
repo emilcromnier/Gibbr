@@ -13,7 +13,7 @@ app.use(express.json());
 //app.use(morgan("dev"));
 
 app.use(cors({
-  origin: "https://gibbr-wnjn.onrender.com",
+  origin: ["http://localhost:3000", "https://gibbr-wnjn.onrender.com"],
   credentials: true
 }));
 
