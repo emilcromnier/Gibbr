@@ -113,10 +113,10 @@ const EditableReviewItem = observer((props) => {
             />
 
             <div className="profile__review--editactions">
-              <button onClick={handleSave} disabled={saving} className="reviewbtn reviewbtn--primary">
+              <button onClick={handleSave} disabled={saving} className="profile__review--savebtn">
                 {saving ? "Saving..." : "Save"}
               </button>
-              <button onClick={() => setIsEditing(false)} className="reviewbtn reviewbtn--secondary">
+              <button onClick={() => setIsEditing(false)} className="profile__review--cancelbtn">
                 Cancel
               </button>
             </div>
@@ -129,10 +129,10 @@ const EditableReviewItem = observer((props) => {
             <p className="profile__review--text">{review.reviewText}</p>
 
             <div className="profile__review--actions">
-              <button onClick={() => setIsEditing(true)} className="reviewbtn reviewbtn--primary">
+              <button onClick={() => setIsEditing(true)} className="profile__review--savebtn">
                 Update
               </button>
-              <button onClick={() => onRemoveReview(review.reviewId)} className="reviewbtn reviewbtn--secondary">
+              <button onClick={() => onRemoveReview(review.reviewId)} className="profile__review--cancelbtn">
                 Delete
               </button>
             </div>

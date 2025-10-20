@@ -87,7 +87,7 @@ function Auth(props) {
           {mode === "login" ? "Login" : "Register"}
         </button>
 
-        {/* ✅ Animated success message */}
+        {/* Animated success message */}
         <AnimatePresence>
           {registered && (
             <motion.div
