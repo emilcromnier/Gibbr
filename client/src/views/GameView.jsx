@@ -161,13 +161,12 @@ const Game = observer((props) => {
             “{existingReview.reviewText}”
           </blockquote>
           <div className="game__review--actions">
-            <button onClick={() => setIsEditing(true)} className="game__review--edit">
+            <button onClick={() => setIsEditing(true)} className="game__review--savebtn">
               Edit Review
             </button>
             <button
               onClick={handleDeleteReview}
-              className="game__review--delete"
-              style={{ backgroundColor: 'red', color: 'white' }}
+              className="game__review--cancelbtn"
             >
               Delete Review
             </button>
@@ -210,11 +209,11 @@ const Game = observer((props) => {
                 />
               </div>
 
-              <div className="game__review--buttons">
+              <div className="game__review--actions">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="game__review--submit"
+                  className="game__review--savebtn"
                 >
                   {submitting
                     ? 'Saving...'
@@ -225,7 +224,7 @@ const Game = observer((props) => {
                 {isEditing && (
                   <button
                     type="button"
-                    className="game__review--cancel"
+                    className="game__review--cancelbtn"
                     onClick={() => setIsEditing(false)}
                   >
                     Cancel

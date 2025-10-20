@@ -26,27 +26,23 @@ function User(props) {
       <div className="profile__header">
         <h1>{username}</h1>
 
-        {showAddFriend && (
-          <div className="profile__addfriend--wrapper">
+        <div className="profile__addfriend--wrapper">
+          {showAddFriend && (
             <button onClick={handleAddFriend} className="profile__addfriend">
               Add Friend
             </button>
+          )}
 
-            <AnimatePresence>
-              {friendAdded && (
-                <motion.div
-                  className="profile__addfriend--success"
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                >
-                  Friend added successfully!
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
+          <motion.div
+            className="profile__addfriend--success"
+            initial={{ opacity: 0, y: 8 }}
+            animate={friendAdded ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            style={{ visibility: friendAdded ? "visible" : "hidden" }}
+          >
+            Friend added successfully!
+          </motion.div>
+        </div>
       </div>
 
       {/* MAIN CONTENT */}
@@ -54,31 +50,32 @@ function User(props) {
         <div className="profile__reviews">
           <h1 className="profile__section--title">Recent Reviews</h1>
           <ul className="profile__reviews--list">
-            {reviews
-              ?.filter((r) => r)
+            {(reviews || [])
+              .filter((r) => r && (r._id || r.reviewId))
               .map((review, index) => {
                 const game = review?.gameDetails;
-                const key = review?.reviewId || review?._id || index;
+                const key = review?.reviewId || review?._id || `review-${index}`;
+
                 return (
                   <li key={key} className="profile__review--item">
                     {game?.image && (
                       <img
                         src={game.image}
-                        alt={game.title || 'Game image'}
+                        alt={game.title || "Game image"}
                         className="profile__review--image"
                       />
                     )}
                     <div className="profile__review--content">
                       <h3 className="profile__review--title">
-                        {game?.title || review?.gameSlug || 'Unknown Game'}
+                        {game?.title || review?.gameSlug || "Unknown Game"}
                       </h3>
                       <div
                         className={`profile__review--rating rating--${review?.rating || 0}`}
                       >
-                        {review?.rating ?? '-'}
+                        {review?.rating ?? "-"}
                       </div>
                       <p className="profile__review--text">
-                        {review?.reviewText || 'No review text available.'}
+                        {review?.reviewText || "No review text available."}
                       </p>
                     </div>
                   </li>

@@ -5,7 +5,6 @@ const User = require("../models/UserSchema");
 const auth = require("../middleware/auth");
 
 // Create review
-// Create review
 router.post("/", auth, async (req, res) => {
   const { gameSlug, reviewText, rating, completed = false, liked = false } = req.body;
 

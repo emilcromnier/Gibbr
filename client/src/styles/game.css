@@ -148,7 +148,6 @@
   transform-origin: top center;
 }
 
-/* Optional soft glowing pulse */
 @keyframes toastPulse {
   0%, 100% { opacity: 0.9; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.03); }
@@ -186,6 +185,53 @@
   font-size: 0.95rem;
   margin-top: 1rem;
   resize: none;
+}
+
+.game__review--actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.game__review--savebtn,
+.game__review--cancelbtn {
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #fff;
+}
+
+.game__review--savebtn {
+  background: rgba(90, 255, 150, 0.1);
+  border: 1px solid rgba(90, 255, 150, 0.25);
+}
+
+.game__review--savebtn:hover {
+  background: rgba(90, 255, 150, 0.25);
+  box-shadow: 0 0 10px rgba(90, 255, 150, 0.3);
+  transform: scale(1.02);
+}
+
+.game__review--cancelbtn {
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+}
+
+.game__review--cancelbtn:hover {
+  background: rgba(255, 80, 80, 0.25);
+  box-shadow: 0 0 10px rgba(255, 80, 80, 0.3);
+  transform: scale(1.02);
+}
+
+.game__review--savebtn:active,
+.game__review--cancelbtn:active {
+  transform: scale(0.97);
+  box-shadow: none;
 }
 
 .game__review--submit {
