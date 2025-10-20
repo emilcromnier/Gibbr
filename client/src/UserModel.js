@@ -289,7 +289,10 @@ async removeFromWishlist(gameOrSlug) {
     });
 
     // Remove from local MobX state
-    this.wishlist = this.wishlist.filter(g => g.slug !== gameSlug);
+const index = this.wishlist.findIndex(g => g.slug === gameSlug);
+if (index !== -1) {
+  this.wishlist.splice(index, 1); // Mutate in-place so MobX sees the change
+}
   } catch (err) {
     this.error = err.response?.data?.error || err.message;
 

@@ -21,6 +21,7 @@ function AuthPresenter(props){
     
       window.location.hash = "#/"; // redirect to home
     } catch (e) {
+        alert("Incorrect Login information: ", e);
     
     }
   }
