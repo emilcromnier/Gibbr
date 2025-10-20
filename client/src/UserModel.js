@@ -203,7 +203,7 @@ getReviewForGame(slug) {
 
       this.token = response.data.token;
         
-      const profileRes = await axios.get("http://localhost:9000/api/auth/me", {
+      const profileRes = await axios.get(`${BACKEND_URL}/me`, {
       headers: {
         Authorization: `Bearer ${this.token}`,
       },
@@ -240,7 +240,7 @@ async restoreSession() {
 
 
   try {
-    const response = await axios.get("http://localhost:9000/api/auth/me", {
+    const response = await axios.get(`${BACKEND_URL}/me`, {
       headers: {
         Authorization: `Bearer ${this.token}`,
       },
