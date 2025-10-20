@@ -12,7 +12,10 @@ app.use(express.json());
 //app.use(helmet());
 //app.use(morgan("dev"));
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({
+  origin: ["http://localhost:3000", "https://gibbr-wnjn.onrender.com"],
+  credentials: true
+}));
 
 // Test route
 app.get("/", (req, res) => {
