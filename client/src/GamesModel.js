@@ -54,7 +54,6 @@ const GamesModel= {
     }
    
     const data = await getRecentGames();
-    console.log("DATA.RESULTS", data.results);
     this.recentGames = data.results.map(game => ({
       id: game.id || game.slug,
       slug: game.slug,

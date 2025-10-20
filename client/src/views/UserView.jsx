@@ -33,7 +33,6 @@ function User(props) {
             </button>
           )}
 
-          {/* Keep this mounted; just animate visibility */}
           <motion.div
             className="profile__addfriend--success"
             initial={{ opacity: 0, y: 8 }}
@@ -41,7 +40,7 @@ function User(props) {
             transition={{ duration: 0.35, ease: "easeOut" }}
             style={{ visibility: friendAdded ? "visible" : "hidden" }}
           >
-            ✅ Friend added successfully!
+            Friend added successfully!
           </motion.div>
         </div>
       </div>

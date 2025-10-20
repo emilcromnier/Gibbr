@@ -39,7 +39,7 @@ async function handleUpdateReview(reviewId, newData) {
     try {
       await userModel.updateReview(reviewId, newData);
     } catch (err) {
-      console.error("Failed to update review:", err);
+  
     }
   }
 
@@ -47,7 +47,7 @@ async function handleUpdateReview(reviewId, newData) {
     try {
       await userModel.deleteReview(reviewId);
     } catch (err) {
-      console.error("Failed to delete review:", err);
+     
     }
   }
 

@@ -27,7 +27,7 @@ function Auth(props) {
         setRegistered(true);
         setTimeout(() => setRegistered(false), 2500);
       } catch (err) {
-        console.error("Registration failed:", err);
+       
       }
     }
   }

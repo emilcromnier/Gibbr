@@ -68,7 +68,7 @@ const Game = observer((props) => {
       setReviewText('');
       setRating(5);
     } catch (err) {
-      console.error('Failed to submit review:', err);
+
       alert('Error submitting review');
     } finally {
       setSubmitting(false);
@@ -81,7 +81,7 @@ const Game = observer((props) => {
       try {
         await props.onDeleteReview(existingReview.reviewId);
       } catch (err) {
-        console.error("Failed to delete review:", err);
+
       }
     }
   }

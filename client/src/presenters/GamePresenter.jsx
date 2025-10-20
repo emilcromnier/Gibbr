@@ -61,7 +61,7 @@ export default observer(function GamePresenter(props) {
     try {
       await userModel.updateReview(reviewId, updatedData);
     } catch (err) {
-      console.error("Update failed:", err);
+    
     }
   }
 
@@ -69,7 +69,7 @@ export default observer(function GamePresenter(props) {
     try {
       await userModel.deleteReview(reviewId);
     } catch (err) {
-      console.error("Delete failed:", err);
+      
     }
   }
 
