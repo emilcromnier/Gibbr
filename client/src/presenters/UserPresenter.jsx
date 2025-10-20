@@ -32,14 +32,16 @@ export default observer(function UserPresenter(props) {
   if (props.model.user.loading) return <div>Loading user...</div>;
 
     const handleAddFriend = () => {
+    if (!user) return;
     props.model.user.addFriend(user._id);
   };
 
   // Hide the button if you’re looking at your own profile
-  const showAddFriend =
-    props.model.user.currentUser &&
-    user._id !== props.model.user.currentUser._id &&
-    !props.model.user.currentUser.friends.includes(user._id);
+const showAddFriend =
+  user &&
+  props.model.user.currentUser &&
+  user._id !== props.model.user.currentUser._id &&
+  !props.model.user.currentUser.friends.includes(user._id);
 
   return (
     <User
