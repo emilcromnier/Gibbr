@@ -41,7 +41,7 @@ function User(props) {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
                 >
-                  ✅ Friend added successfully!
+                  Friend added successfully!
                 </motion.div>
               )}
             </AnimatePresence>

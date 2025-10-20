@@ -13,7 +13,7 @@ export default observer(function UserPresenter(props) {
     if (!username) return;
     props.model.user.fetchUserByUsername(username); // store user in usersByUsername
     
-    console.log("USER", user);
+ 
   }, [username, props.model.user]);
 
     const user = props.model.user.otherUser;
