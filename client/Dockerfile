@@ -1,4 +1,3 @@
-
 #Build React app
 FROM node:20 AS build
 
@@ -10,6 +9,10 @@ RUN npm install
 
 COPY . .
 
+# Accept build argument and set as environment variable for Vite
+ARG VITE_BACKEND_URL
+ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
+
 RUN npm run build
 
 #Run serve with Nginx
@@ -19,4 +22,3 @@ COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
-
